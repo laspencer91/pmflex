@@ -1,0 +1,107 @@
+// Promod UI learning pass, added 2026-10-09. See LICENSE.md.
+#include "ui/menudef.h"
+#include "ui_mp/ui_lab_components.inc"
+
+{
+ menuDef
+ {
+  name "ui_lab"
+  rect 0 0 640 480
+  style WINDOW_STYLE_EMPTY
+  focuscolor 0.35 0.85 0.95 1
+  onOpen { exec "setdvartotime ui_lab_open_time"; }
+  onEsc { scriptMenuResponse "close"; close self; }
+  execKey "1" { setDvar ui_lab_page "0"; }
+  execKey "2" { setDvar ui_lab_page "1"; }
+  execKey "3" { setDvar ui_lab_page "2"; }
+  execKey "4" { setDvar ui_lab_page "3"; }
+  execKey "5" { setDvar ui_lab_page "4"; }
+
+  itemDef { rect 186 54 434 366 0 0 style WINDOW_STYLE_SHADER
+   exp rect X(403 - 217 * LAB_REVEAL); exp rect Y(237 - 183 * LAB_REVEAL);
+   exp rect W(max(1, 434 * LAB_REVEAL)); exp rect H(max(1, 366 * LAB_REVEAL));
+   exp material(dvarString(ui_lab_material)); forecolor 1 1 1 1
+   exp forecolor A(min(1, dvarFloat(ui_lab_opacity) + 0.08)); visible 1 decoration }
+  itemDef { rect 186 54 434 366 0 0 style WINDOW_STYLE_SHADER
+   exp rect X(403 - 217 * LAB_REVEAL); exp rect Y(237 - 183 * LAB_REVEAL);
+   exp rect W(max(1, 434 * LAB_REVEAL)); exp rect H(max(1, 366 * LAB_REVEAL));
+   background "lab_corner_panel" forecolor 1 1 1 0.95 visible 1 decoration }
+  itemDef { rect -31 -129 868 732 0 0 style WINDOW_STYLE_SHADER
+   exp rect X(403 - 434 * LAB_REVEAL); exp rect Y(237 - 366 * LAB_REVEAL);
+   exp rect W(max(1, 868 * LAB_REVEAL)); exp rect H(max(1, 732 * LAB_REVEAL));
+   background "lab_glow_panel" forecolor 1 1 1 0.55 visible 1 decoration }
+  itemDef { rect 204 67 390 26 0 0 type ITEM_TYPE_TEXT text "PROMOD / UI LAB"
+   textfont UI_FONT_NORMAL textscale 0.42 textaligny 23 forecolor 0.35 0.85 0.95 1 visible 1 decoration }
+  itemDef { rect 204 98 395 22 0 0 type ITEM_TYPE_TEXT text "1 Spacing  2 Components  3 Events  4 Anchors  5 Style"
+   textfont UI_FONT_NORMAL textscale 0.245 textaligny 17 forecolor 0.72 0.80 0.85 1 visible 1 decoration }
+  itemDef { rect 204 120 396 1 0 0 style WINDOW_STYLE_FILLED backcolor 0.20 0.32 0.38 1 visible 1 decoration }
+  itemDef { rect 204 386 395 24 0 0 type ITEM_TYPE_TEXT text "F7 opens this lab. Number keys change pages. Esc closes."
+   textfont UI_FONT_NORMAL textscale 0.245 textaligny 17 forecolor 0.62 0.72 0.78 1 visible 1 decoration }
+
+  LAB_TEXT("s_title", 204, 131, 390, "SPACING AND TYPE", 0.34, 0)
+  LAB_TEXT("s_note", 204, 157, 390, "Compare a fixed 120 x 60 card with different padding.", 0.265, 0)
+  LAB_PANEL("s_4", 204, 192, 120, 60, 0)
+  LAB_PANEL("s_12", 338, 192, 120, 60, 0)
+  LAB_PANEL("s_20", 472, 192, 120, 60, 0)
+  LAB_TEXT("s_4_t", 208, 196, 110, "4 units", 0.30, 0)
+  LAB_TEXT("s_12_t", 350, 204, 96, "12 units", 0.30, 0)
+  LAB_TEXT("s_20_t", 492, 212, 80, "20 units", 0.30, 0)
+  LAB_TEXT("s_small", 204, 269, 390, "Menu textscale 0.25: small label", 0.25, 0)
+  LAB_TEXT("s_body", 204, 294, 390, "Menu textscale 0.33: body text", 0.33, 0)
+  LAB_TEXT("s_large", 204, 323, 390, "Menu textscale 0.42: heading", 0.42, 0)
+  LAB_TEXT("s_units", 204, 354, 390, "Menu canvas: 640 x 480. Compare at multiple aspect ratios.", 0.245, 0)
+
+  LAB_TEXT("c_title", 204, 131, 390, "REUSABLE COMPONENTS", 0.34, 1)
+  LAB_TEXT("c_note", 204, 157, 390, "The two live HUD cards use the same GSC factory.", 0.265, 1)
+  LAB_TEXT("c_parent", 204, 184, 390, "Parent: panel. Children: title, value, progress bar.", 0.265, 1)
+  LAB_BUTTON("c_fill", 204, 221, 188, "Cycle sample fill", "fill", 1)
+  LAB_BUTTON("c_gap", 404, 221, 188, "Cycle HUD gap", "spacing", 1)
+  itemDef { rect 204 260 390 24 0 0 type ITEM_TYPE_TEXT
+   exp text ( "Card gap: " + dvarString(ui_lab_gap) + " / Sample fill: " + dvarString(ui_lab_fill) + "%" )
+   textfont UI_FONT_NORMAL textscale 0.30 textaligny 20 forecolor 0.95 0.72 0.30 1
+   visible when ( dvarInt(ui_lab_page) == 1 ) decoration }
+  LAB_TEXT("c_layers", 204, 298, 390, "Panel, bar and text use separate draw-order values.", 0.265, 1)
+  LAB_TEXT("c_data", 204, 325, 390, "Sample values do not change gameplay stats.", 0.265, 1)
+
+  LAB_TEXT("e_title", 204, 131, 390, "EVENTS AND ANIMATION", 0.34, 2)
+  LAB_TEXT("e_note", 204, 157, 390, "Button -> menu response -> GSC -> HUD and client DVars.", 0.255, 2)
+  LAB_BUTTON("e_event", 204, 201, 188, "Send test event", "event", 2)
+  LAB_BUTTON("e_fill", 404, 201, 188, "Change sample fill", "fill", 2)
+  itemDef { rect 204 246 390 24 0 0 type ITEM_TYPE_TEXT
+   exp text ( "Event count: " + dvarString(ui_lab_counter) ) textfont UI_FONT_NORMAL
+   textscale 0.38 textaligny 22 forecolor 0.35 0.85 0.95 1
+   visible when ( dvarInt(ui_lab_page) == 2 ) decoration }
+  itemDef { rect 204 280 390 24 0 0 type ITEM_TYPE_TEXT
+   exp text dvarString(ui_lab_status) textfont UI_FONT_NORMAL
+   textscale 0.30 textaligny 20 forecolor 0.86 0.90 0.94 1
+   visible when ( dvarInt(ui_lab_page) == 2 ) decoration }
+  LAB_TEXT("e_toast", 204, 319, 390, "The toast moves, holds, then fades after an event.", 0.265, 2)
+  LAB_TEXT("e_spawn", 204, 346, 390, "Player spawn also sends an event to this preview.", 0.265, 2)
+
+  LAB_TEXT("a_title", 204, 131, 390, "ANCHORS AND VISIBILITY", 0.34, 3)
+  LAB_TEXT("a_note", 204, 157, 390, "Move the parent panels; inspect their child elements.", 0.265, 3)
+  LAB_BUTTON("a_anchor", 204, 201, 188, "Cycle HUD anchor", "anchor", 3)
+  LAB_BUTTON("a_toggle", 404, 201, 188, "Toggle HUD preview", "toggle", 3)
+  LAB_BUTTON("a_margin", 204, 236, 188, "Cycle vertical margin", "margin", 3)
+  itemDef { rect 204 273 390 24 0 0 type ITEM_TYPE_TEXT
+   exp text ( "Anchor: " + dvarString(ui_lab_anchor) + " / Inset: " + dvarString(ui_lab_margin_percent) + "% height" ) textfont UI_FONT_NORMAL
+   textscale 0.28 textaligny 22 forecolor 0.35 0.85 0.95 1
+   visible when ( dvarInt(ui_lab_page) == 3 ) decoration }
+  LAB_TEXT("a_api", 204, 310, 390, "GSC layout: setParent, setPoint, updateChildren.", 0.265, 3)
+  LAB_TEXT("a_check", 204, 338, 390, "Close the menu to inspect the preview against gameplay.", 0.255, 3)
+  LAB_TEXT("a_record", 204, 365, 390, "Record clipping, overlap and spacing at your resolution.", 0.255, 3)
+
+  LAB_TEXT("v_title", 204, 131, 390, "GRADIENTS AND CORNER BORDERS", 0.32, 4)
+  LAB_TEXT("v_note", 204, 157, 390, "Four corner colors and alpha are blended into each texture.", 0.25, 4)
+  LAB_BUTTON("v_style", 204, 195, 188, "Cycle gradient", "style", 4)
+  LAB_BUTTON("v_opacity", 404, 195, 188, "Cycle opacity", "opacity", 4)
+  LAB_ACTION_BUTTON("v_replay", 204, 236, 188, "Replay center reveal", exec "setdvartotime ui_lab_open_time"; scriptMenuResponse "reveal";, 4)
+  LAB_BUTTON("v_event", 404, 236, 188, "Trigger toast", "event", 4)
+  itemDef { rect 204 278 390 24 0 0 type ITEM_TYPE_TEXT
+   exp text( dvarString(ui_lab_style_name) + " / Opacity: " + dvarString(ui_lab_opacity_percent) + "%" )
+   textfont UI_FONT_NORMAL textscale 0.29 textaligny 20 forecolor 0.95 0.95 1 1
+   visible when ( dvarInt(ui_lab_page) == 4 && LAB_REVEAL > 0.98 ) decoration }
+  LAB_TEXT("v_frame", 204, 316, 390, "White corner frames, soft halos, translucent fill.", 0.25, 4)
+  LAB_TEXT("v_anim", 204, 344, 390, "F10 replays the HUD reveal with the menu closed.", 0.25, 4)
+ }
+}

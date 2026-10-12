@@ -1,0 +1,38 @@
+[
+  {
+    "name": "penetration-ammo",
+    "pngDimensions": [
+      64,
+      64
+    ],
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "iwiDimensions": [
+      64,
+      64,
+      1
+    ],
+    "sha256": "b24d02b62d788fa879c3c9297c82b5ac842e40489fb4e937892c60b4fa650ae7"
+  },
+  {
+    "name": "wall-impact",
+    "pngDimensions": [
+      64,
+      64
+    ],
+    "mode": "RGBA",
+    "alphaRange": [
+      0,
+      255
+    ],
+    "iwiDimensions": [
+      64,
+      64,
+      1
+    ],
+    "sha256": "98296d3077334f176f8de0d7e9b7c5f6694309c1c4fe102187986397607d7ca2"
+  }
+]

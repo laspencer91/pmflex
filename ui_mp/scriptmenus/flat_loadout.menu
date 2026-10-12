@@ -1,0 +1,136 @@
+// Single-page selector; stock data and validation, custom arrangement. See LICENSE.md.
+#include "ui/menudef.h"
+#include "ui_mp/flat_loadout_widgets.inc"
+{
+ menuDef {
+  name "flat_loadout" rect 0 0 640 480 0 0 style WINDOW_STYLE_EMPTY blurWorld 3
+  focuscolor 1 0.85 0.60 1
+  onOpen { setDvar flat_cash_anim "0"; setDvar flat_hover_armor "0"; setDvar flat_hover_attachment ""; setDvar flat_hover_frag "0"; setDvar flat_hover_mate ""; setDvar flat_hover_tactical "0"; setDvar flat_hint ""; scriptMenuResponse "refresh"; }
+  onClose { scriptMenuResponse "closed"; }
+  onEsc { close self; }
+  execKey "1" { CASH_BEGIN scriptMenuResponse "select:assault"; }
+  execKey "2" { CASH_BEGIN scriptMenuResponse "select:specops"; }
+  execKey "3" { CASH_BEGIN scriptMenuResponse "select:sniper"; }
+  execKey "4" { CASH_BEGIN scriptMenuResponse "select:demolitions"; }
+  execKey "5" { scriptMenuResponse "spectate"; }
+  execKeyInt 13 { scriptMenuResponse "deploy"; }
+  // Right-click (key 201) refunds whatever is hovered; the server checks ownership.
+  execKeyInt 201 { CASH_BEGIN execOnDvarIntValue flat_hover_frag 1 "openscriptmenu flat_loadout refund_frag"; execOnDvarIntValue flat_hover_armor 1 "openscriptmenu flat_loadout refund_armor"; execOnDvarStringValue flat_hover_attachment "buy_sniper_penetration" "openscriptmenu flat_loadout refund_sniper_penetration"; execOnDvarStringValue flat_hover_attachment "attachment:silencer" "openscriptmenu flat_loadout refund_silencer"; execOnDvarStringValue flat_hover_attachment "attachment:reflex" "openscriptmenu flat_loadout refund_reflex"; execOnDvarStringValue flat_hover_attachment "pistol_attachment:silencer" "openscriptmenu flat_loadout refund_pistol_silencer"; }
+  itemDef { rect 0 0 640 480 HORIZONTAL_ALIGN_FULLSCREEN VERTICAL_ALIGN_FULLSCREEN style WINDOW_STYLE_FILLED backcolor 0 0 0 0.66 visible 1 decoration }
+  itemDef { rect 0 0 854 75 HORIZONTAL_ALIGN_FULLSCREEN 0 style WINDOW_STYLE_SHADER background "gradient_top" visible 1 decoration }
+  FLAT_TEXT(16, 12, 270, "PROMOD / LOADOUT", 0.39)
+  itemDef { rect 384 8 240 30 0 0 style WINDOW_STYLE_FILLED backcolor 0.10 0.26 0.13 0.75 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.35 0.55 0.36 0.9 visible when(LIVE_BUY_OPEN) decoration }
+  itemDef { rect 384 8 240 30 0 0 style WINDOW_STYLE_FILLED backcolor 0.26 0.08 0.07 0.75 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.6 0.27 0.24 0.9 visible when(BUY_CLOSED) decoration }
+  itemDef { rect 384 8 74 30 0 0 type ITEM_TYPE_TEXT exp text(dvarString(flat_team)); textfont UI_FONT_NORMAL textscale 0.22 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 20 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor 0.8 0.82 0.85 1 visible 1 decoration }
+  itemDef { rect 458 8 166 30 0 0 type ITEM_TYPE_TEXT exp text("BUY OPEN  " + dvarString(flat_buy_seconds) + "s"); textfont UI_FONT_NORMAL textscale 0.36 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 23 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor MONEY_COLOR visible when(LIVE_BUY_OPEN) decoration }
+  itemDef { rect 458 8 166 30 0 0 type ITEM_TYPE_TEXT text "BUY CLOSED" textfont UI_FONT_NORMAL textscale 0.36 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 23 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor CLOSED_COLOR visible when(BUY_CLOSED) decoration }
+  FLAT_VALUE(16, 37, 600, dvarString(flat_status), 0.22, !WAIT_FOR_SPAWN)
+  FLAT_VALUE(16, 37, 600, "Wait for spawn - purchases require an alive player", 0.22, WAIT_FOR_SPAWN)
+  FLAT_TEXT(16, 62, 172, "CHOOSE CLASS", 0.32)
+  RICH_CLASS(88, "1", "Assault", "assault", "select:assault", "hud_icon_ak47", 21)
+  FLAT_SLOT(135, 118, "assault", 1)
+  FLAT_SLOT(145, 118, "assault", 2)
+  FLAT_SLOT(155, 118, "assault", 3)
+  FLAT_SLOT(165, 118, "assault", 4)
+  FLAT_SLOT(175, 118, "assault", 5)
+  RICH_CLASS(140, "2", "Spec Ops", "specops", "select:specops", "hud_icon_mp5", 42)
+  FLAT_SLOT(165, 170, "specops", 1)
+  FLAT_SLOT(175, 170, "specops", 2)
+  RICH_CLASS(192, "3", "Sniper", "sniper", "select:sniper", "hud_icon_m40a3", 21)
+  FLAT_SLOT(175, 222, "sniper", 1)
+  RICH_CLASS(244, "4", "Demolitions", "demolitions", "select:demolitions", "hud_icon_winchester_1200", 21)
+  FLAT_SLOT(175, 274, "demolitions", 1)
+
+  RICH_PRICE(99, 266, 65, "$" + dvarString(economy_demolition_price), 0.18, dvarInt(flat_economy_live))
+  RICH_VALUE(99, 266, 65, "$300", 0.18, MONEY_COLOR, !dvarInt(flat_economy_live))
+  FLAT_OPTION("spectate", 16, 299, 172, "5  Spectate team", "spectate", 1, 1, 0)
+  FLAT_PANEL(204, 72, 420, 324)
+  itemDef { rect 228 199 372 35 0 0 type ITEM_TYPE_TEXT text "CHOOSE A CLASS" textfont UI_FONT_NORMAL textscale 0.52 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 27 forecolor 0.9 0.92 0.94 1 textstyle ITEM_TEXTSTYLE_SHADOWED visible when(!FLAT_READY) decoration }
+  itemDef { rect 228 238 372 20 0 0 type ITEM_TYPE_TEXT text "Select a class on the left to configure your loadout" textfont UI_FONT_NORMAL textscale 0.24 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 15 forecolor 0.65 0.68 0.7 1 visible when(!FLAT_READY) decoration }
+  FLAT_VALUE(220, 85, 386, dvarString(flat_class_name), 0.40, FLAT_READY)
+  itemDef { rect 362 87 214 18 0 0 type ITEM_TYPE_TEXT style WINDOW_STYLE_FILLED backcolor 0.26 0.08 0.07 0.75 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.6 0.27 0.24 0.9 text "BUY CLOSED - OPENS NEXT ROUND" textfont UI_FONT_NORMAL textscale 0.17 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 12 forecolor CLOSED_COLOR visible when(FLAT_READY && BUY_CLOSED) decoration }
+  RICH_VALUE(304, 110, 142, "@" + tablelookup("mp/statstable.csv", 4, dvarString(loadout_primary), 3), 0.30, CLASS_COLOR, FLAT_READY)
+  FLAT_VALUE(494, 110, 112, "@" + tablelookup("mp/statstable.csv", 4, dvarString(loadout_secondary), 3), 0.23, FLAT_READY)
+  RICH_PRICE(220, 133, 38, "$" + dvarString(economy_demolition_price), 0.21, FLAT_READY && dvarString(loadout_class) == "demolitions" && dvarInt(flat_economy_live))
+  RICH_VALUE(220, 133, 38, "$300", 0.21, MONEY_COLOR, FLAT_READY && dvarString(loadout_class) == "demolitions" && !dvarInt(flat_economy_live))
+  itemDef { rect 304 136 142 14 0 0 style WINDOW_STYLE_SHADER exp material(dvarString(flat_camo_material)); forecolor 1 1 1 0.85 visible when(FLAT_READY && dvarString(loadout_camo) != "camo_none") decoration }
+  itemDef { name "camo" rect 304 136 142 14 0 0 type ITEM_TYPE_BUTTON style WINDOW_STYLE_FILLED backcolor 0 0 0 0.40 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.4 0.4 0.42 0.7 exp text("CAMO: " + dvarString(flat_camo_label)); textfont UI_FONT_NORMAL textscale 0.17 textalignx 5 textaligny 10 forecolor 0.95 0.95 0.97 1 textstyle ITEM_TEXTSTYLE_SHADOWEDMORE visible when(FLAT_READY) onFocus { HINT_ON("Click to cycle camo for this weapon") } leaveFocus { HINT_OFF } action { scriptMenuResponse "camo:next"; } }
+  FLAT_WEAPON_TILE(304, 153, 142, 75, 114, 57, loadout_primary, "flat_primary_picker", "Change primary", "Choose your primary weapon")
+  FLAT_WEAPON_TILE(494, 136, 112, 92, 64, 64, loadout_secondary, "flat_secondary_picker", "Change sidearm", "Choose your sidearm")
+  #define PRIMARY_ATTACH FLAT_READY && (dvarString(loadout_class) == "assault" || dvarString(loadout_class) == "specops") && dvarString(loadout_primary) != "mp44"
+  RICH_ATTACHMENT(262, 136, 34, "attachment:none", "white", PRIMARY_ATTACH, dvarString(loadout_primary_attachment) == "none", dvarInt("attach_allow_" + dvarString(loadout_class) + "_none"), "", 0.9 0.9 0.92 1, "No attachment")
+  RICH_ATTACHMENT(262, 167, 34, "attachment:silencer", "weapon_attachment_suppressor", PRIMARY_ATTACH, dvarString(loadout_primary_attachment) == "silencer", dvarInt("attach_allow_" + dvarString(loadout_class) + "_silencer") && (PURCHASE_OPEN || dvarInt(economy_suppressor_primary_owned)), "$" + dvarString(economy_suppressor_price), MONEY_COLOR, "Suppressor: quieter, shorter range. Spend the money if you like the way it sounds. Right-click to refund")
+  RICH_ATTACHMENT(262, 198, 34, "attachment:reflex", "weapon_attachment_reflex", PRIMARY_ATTACH && dvarInt(economy_red_dot_supported) && (dvarInt(flat_economy_live) || dvarInt(economy_red_dot_free)), dvarString(loadout_primary_attachment) == "reflex", dvarInt(economy_can_buy_red_dot) || dvarInt(economy_red_dot_owned) || dvarInt(economy_red_dot_free), dvarString(economy_red_dot_label), MONEY_COLOR, "Red dot sight: follows you to any gun that takes one. Right-click to refund")
+  #define PISTOL_ATTACH FLAT_READY && dvarString(loadout_secondary) != "deserteagle" && dvarString(loadout_secondary) != "deserteaglegold"
+  #define SNIPER_UPGRADE FLAT_READY && dvarInt(flat_economy_live) && dvarInt(economy_sniper_penetration_supported)
+  RICH_ATTACHMENT(262, 136, 34, "buy_sniper_penetration", "ui_penetration_ammo", SNIPER_UPGRADE, dvarInt(economy_sniper_penetration_owned), dvarInt(economy_can_buy_sniper_penetration) || dvarInt(economy_sniper_penetration_owned), "$" + dvarString(economy_sniper_penetration_price), MONEY_COLOR, "Sniper upgrade: this round, torso wallbangs ignore enemy armor. Right-click to refund")
+  itemDef { rect 582 85 20 20 0 0 style WINDOW_STYLE_SHADER background "ui_wall_impact" forecolor 1 1 1 0.9 visible when(SNIPER_UPGRADE && dvarInt(economy_sniper_penetration_owned)) decoration }
+  RICH_ATTACHMENT(462, 136, 26, "pistol_attachment:none", "white", PISTOL_ATTACH, dvarString(loadout_secondary_attachment) == "none", dvarInt(attach_allow_pistol_none), "", 0.9 0.9 0.92 1, "No attachment")
+  RICH_ATTACHMENT(462, 167, 26, "pistol_attachment:silencer", "weapon_attachment_suppressor", PISTOL_ATTACH, dvarString(loadout_secondary_attachment) == "silencer", dvarInt(attach_allow_pistol_silencer) && (PURCHASE_OPEN || dvarInt(economy_suppressor_secondary_owned)), "$" + dvarString(economy_suppressor_price), MONEY_COLOR, "Suppressor: quieter, shorter range. Spend the money if you like the way it sounds. Right-click to refund")
+  // Armor column
+  itemDef { rect 220 246 80 138 0 0 type ITEM_TYPE_BUTTON style WINDOW_STYLE_FILLED backcolor 0 0 0 0.28 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.3 0.3 0.325 0.8 text "ARMOR" textfont UI_FONT_NORMAL textscale 0.17 textalignx 10 textaligny 18 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor 0.65 0.68 0.7 1 visible when(FLAT_READY && ARMOR_ON) onFocus { setDvar flat_hover_armor "1"; HINT_ON("Armor: each charge absorbs part of one wallbang hit. Click to buy one, right-click to refund one") } leaveFocus { setDvar flat_hover_armor "0"; HINT_OFF } action { CASH_BEGIN scriptMenuResponse "buy_armor"; } }
+  itemDef { rect 221 247 78 136 0 0 style WINDOW_STYLE_FILLED backcolor 0.13 0.34 0.17 0.22 visible when(FLAT_READY && ARMOR_ON && dvarInt(flat_hover_armor) && PURCHASE_OPEN && ARMOR_OPEN) decoration }
+  itemDef { rect 240 268 40 16 0 0 type ITEM_TYPE_TEXT style WINDOW_STYLE_FILLED backcolor 0 0 0 0.6 textfont UI_FONT_NORMAL textscale 0.2 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 12 textstyle ITEM_TEXTSTYLE_SHADOWED exp text("$" + dvarString(economy_armor_price)); forecolor MONEY_COLOR exp forecolor A(0.4 + 0.6 * dvarInt(economy_can_buy_armor)); visible when(FLAT_READY && ARMOR_ON && ARMOR_OPEN && BUY_CLOSED == 0) decoration }
+  itemDef { rect 244 289 32 32 0 0 style WINDOW_STYLE_SHADER background "specialty_armorvest" forecolor 1 1 1 1 exp forecolor A(0.18 + 0.82 * (ARMOR_CHARGES >= 2)); visible when(FLAT_READY && ARMOR_ON && dvarInt(economy_armor_capacity) >= 2) decoration }
+  itemDef { rect 244 323 32 32 0 0 style WINDOW_STYLE_SHADER background "specialty_armorvest" forecolor 1 1 1 1 exp forecolor A(0.18 + 0.82 * (ARMOR_CHARGES >= 1)); visible when(FLAT_READY && ARMOR_ON) decoration }
+  itemDef { rect 220 353 80 20 0 0 type ITEM_TYPE_TEXT exp text(dvarString(economy_armor_charges) + "/" + dvarString(economy_armor_capacity)); textfont UI_FONT_NORMAL textscale 0.2 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 14 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor 0.9 0.9 0.92 1 visible when(FLAT_READY && ARMOR_ON) decoration }
+  // Grenades box: frag (left half) and tactical (right half)
+  itemDef { rect 310 246 296 138 0 0 exp rect X(GEAR_X); exp rect W(GEAR_W); type ITEM_TYPE_TEXT style WINDOW_STYLE_FILLED backcolor 0 0 0 0.28 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.3 0.3 0.325 0.8 text "GRENADES" textfont UI_FONT_NORMAL textscale 0.17 textalignx 10 textaligny 18 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor 0.65 0.68 0.7 1 visible when(FLAT_READY) decoration }
+  itemDef { rect 311 247 147 136 0 0 exp rect X(GEAR_X + 1); exp rect W(GEAR_HALF - 1); style WINDOW_STYLE_FILLED backcolor 0.13 0.34 0.17 0.22 visible when(FLAT_READY && dvarInt(flat_hover_frag) && PURCHASE_OPEN) decoration }
+  itemDef { rect 458 247 147 136 0 0 exp rect X(GEAR_X + GEAR_HALF); exp rect W(GEAR_HALF - 1); style WINDOW_STYLE_FILLED backcolor 0.7 0.7 0.73 0.08 visible when(FLAT_READY && dvarInt(flat_hover_tactical)) decoration }
+  itemDef { rect 310 246 148 138 0 0 exp rect X(GEAR_X); exp rect W(GEAR_HALF); type ITEM_TYPE_BUTTON visible when(FLAT_READY && dvarInt(weap_allow_frag_grenade)) onFocus { setDvar flat_hover_frag "1"; HINT_ON("Frag grenade: click to buy, right-click to refund. An unused frag carries over if you survive") } leaveFocus { setDvar flat_hover_frag "0"; HINT_OFF } action { CASH_BEGIN scriptMenuResponse "preview_frag"; } }
+  itemDef { rect 352 268 64 64 0 0 exp rect X(GEAR_ICON_X(0)); style WINDOW_STYLE_SHADER background "weapon_fraggrenade" forecolor 1 1 1 1 exp forecolor A(min(1, 0.2 + 0.8 * dvarInt(flat_preview_frag) + 0.15 * (dvarInt(flat_hover_frag) && PURCHASE_OPEN))); visible when(FLAT_READY && dvarInt(weap_allow_frag_grenade)) decoration }
+  itemDef { rect 402 262 40 16 0 0 exp rect X(GEAR_ICON_X(0) + 50); type ITEM_TYPE_TEXT style WINDOW_STYLE_FILLED backcolor 0 0 0 0.6 textfont UI_FONT_NORMAL textscale 0.2 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 12 textstyle ITEM_TEXTSTYLE_SHADOWED exp text("$" + dvarString(economy_frag_price)); forecolor MONEY_COLOR visible when(FLAT_READY && BUY_CLOSED == 0 && !dvarInt(flat_preview_frag)) decoration }
+  itemDef { rect 310 335 148 20 0 0 exp rect X(GEAR_X); exp rect W(GEAR_HALF); type ITEM_TYPE_TEXT exp text("FRAG x" + dvarString(flat_preview_frag)); textfont UI_FONT_NORMAL textscale 0.22 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 15 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor 0.9 0.9 0.92 1 exp forecolor A(0.55 + 0.45 * dvarInt(flat_preview_frag)); visible when(FLAT_READY) decoration }
+  itemDef { rect 310 350 148 20 0 0 exp rect X(GEAR_X); exp rect W(GEAR_HALF); type ITEM_TYPE_TEXT textfont UI_FONT_NORMAL textscale 0.13 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 13 forecolor 0.8 0.82 0.85 0.8 text "CLICK TO BUY" visible when(FLAT_READY && dvarInt(weap_allow_frag_grenade) && !dvarInt(flat_preview_frag) && PURCHASE_OPEN && BUY_CLOSED == 0) decoration }
+  itemDef { rect 310 350 148 20 0 0 exp rect X(GEAR_X); exp rect W(GEAR_HALF); type ITEM_TYPE_TEXT textfont UI_FONT_NORMAL textscale 0.13 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 13 forecolor 0.8 0.82 0.85 0.8 text "RIGHT-CLICK TO REFUND" visible when(FLAT_READY && dvarInt(economy_frag_refundable)) decoration }
+  itemDef { rect 458 246 148 138 0 0 exp rect X(GEAR_X + GEAR_HALF); exp rect W(GEAR_HALF); type ITEM_TYPE_BUTTON exp text(dvarString(flat_utility_name) + " x" + dvarString(flat_tactical_count)); textfont UI_FONT_NORMAL textscale 0.22 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 104 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor 0.9 0.9 0.92 1 visible when(FLAT_READY) onFocus { setDvar flat_hover_tactical "1"; HINT_ON("Click to swap between flashbang and smoke") } leaveFocus { setDvar flat_hover_tactical "0"; HINT_OFF } action { play "mouse_click"; scriptMenuResponse "toggle_tactical"; } }
+  itemDef { rect 500 268 64 64 0 0 exp rect X(GEAR_ICON_X(GEAR_HALF)); style WINDOW_STYLE_SHADER exp material(dvarString(flat_utility_material)); forecolor 1 1 1 1 visible when(FLAT_READY) decoration }
+  itemDef { rect 458 350 148 20 0 0 exp rect X(GEAR_X + GEAR_HALF); exp rect W(GEAR_HALF); type ITEM_TYPE_TEXT textfont UI_FONT_NORMAL textscale 0.13 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 13 forecolor 0.8 0.82 0.85 0.8 text "CLICK TO SWAP" visible when(FLAT_READY) decoration }
+  itemDef { rect 16 344 172 47 0 0 style WINDOW_STYLE_SHADER background "gradient_center" forecolor 0.12 0.27 0.15 0.9 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.35 0.5 0.36 0.6 visible 1 decoration }
+  RICH_VALUE(27, 346, 145, "CASH", 0.18, 0.78 0.85 0.78 1, 1)
+  itemDef { name "repeat_buy" rect 88 346 92 16 0 0 type ITEM_TYPE_BUTTON style WINDOW_STYLE_FILLED backcolor 0 0 0 0.35 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.35 0.5 0.36 0.6 exp text(dvarString(economy_repeat_label)); textfont UI_FONT_NORMAL textscale 0.16 textalign ITEM_ALIGN_CENTER textaligny 11 forecolor MONEY_COLOR visible when(FLAT_READY && dvarInt(flat_economy_live)) onFocus { HINT_ON("Auto-rebuy: each round, re-buys the weapon upgrade, frag and armor you have now") } leaveFocus { HINT_OFF } action { play "mouse_click"; scriptMenuResponse "repeat_buy"; } }
+  RICH_VALUE(27, 368, 145, "$" + CASH_RENDER, 0.43, MONEY_COLOR, dvarInt(flat_cash_anim))
+  RICH_VALUE(27, 368, 145, "$" + dvarString(flat_cash_display), 0.43, MONEY_COLOR, !dvarInt(flat_cash_anim))
+  RICH_TEAM(16, "0") RICH_TEAM(110, "1") RICH_TEAM(204, "2") RICH_TEAM(298, "3") RICH_TEAM(392, "4")
+  FLAT_PANEL(500, 400, 124, 56)
+  itemDef { rect 500 400 124 56 0 0 type ITEM_TYPE_BUTTON text "DEPLOY" textfont UI_FONT_NORMAL textscale 0.4 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 34 forecolor CLASS_COLOR visible when(FLAT_READY && BUY_OPEN) onFocus { HINT_ON("Spawn with this loadout") } leaveFocus { HINT_OFF } action { scriptMenuResponse "deploy"; } }
+  itemDef { rect 500 400 124 56 0 0 type ITEM_TYPE_BUTTON text "SAVE & CLOSE" textfont UI_FONT_NORMAL textscale 0.30 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 34 forecolor CLASS_COLOR visible when(FLAT_READY && BUY_CLOSED) onFocus { HINT_ON("Keep this loadout for your next spawn") } leaveFocus { HINT_OFF } action { scriptMenuResponse "deploy"; } }
+  itemDef { rect 16 460 608 18 0 0 type ITEM_TYPE_TEXT text "1-4 Class   5 Spectate   Enter Deploy   Esc Close" textfont UI_FONT_NORMAL textscale 0.20 textalignx 6 textaligny 14 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor 0.9 0.92 0.94 1 visible when(dvarString(flat_hint) == "") decoration }
+  itemDef { rect 16 460 608 18 0 0 type ITEM_TYPE_TEXT style WINDOW_STYLE_FILLED backcolor 0 0 0 0.55 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.4 0.4 0.42 0.6 exp text(dvarString(flat_hint)); textfont UI_FONT_NORMAL textscale 0.21 textalignx 6 textaligny 14 textstyle ITEM_TEXTSTYLE_SHADOWED forecolor CLASS_COLOR visible when(dvarString(flat_hint) != "") decoration }
+ }
+ menuDef {
+  name "flat_primary_picker" rect 100 114 210 276 0 0 style WINDOW_STYLE_EMPTY popup
+  focuscolor 1 0.81 0.53 1 onEsc { close self; }
+  FLAT_PICKER_FRAME(dvarInt(flat_primary_rows), "PRIMARY WEAPON")
+  RICH_PRIMARY_ROW(36, "0", 0)
+  RICH_PRIMARY_ROW(67, "1", 1)
+  RICH_PRIMARY_ROW(98, "2", 2)
+  RICH_PRIMARY_ROW(129, "3", 3)
+  RICH_PRIMARY_ROW(160, "4", 4)
+  RICH_PRIMARY_ROW(191, "5", 5)
+  RICH_PRIMARY_ROW(222, "6", 6)
+ }
+ menuDef {
+  name "flat_secondary_picker" rect 276 134 210 214 0 0 style WINDOW_STYLE_EMPTY popup
+  focuscolor 1 0.81 0.53 1 onEsc { close self; }
+  FLAT_PICKER_FRAME(5, "SIDEARM")
+  FLAT_PICK_PISTOL(36, "Desert Eagle", "deserteagle")
+  FLAT_PICK_PISTOL(67, "Gold Eagle", "deserteaglegold")
+  FLAT_PICK_PISTOL(98, "M1911", "colt45")
+  FLAT_PICK_PISTOL(129, "USP", "usp")
+  FLAT_PICK_PISTOL(160, "M9", "beretta")
+ }
+
+ menuDef {
+  name "flat_demolition_confirm" rect 200 170 240 140 0 0 style WINDOW_STYLE_EMPTY popup
+  focuscolor 1 0.85 0.60 1
+  onClose { scriptMenuResponse "cancel_demolition"; }
+  onEsc { close self; }
+  FLAT_PANEL(0, 0, 240, 140)
+  FLAT_TEXT(12, 14, 216, "Purchase for $300?", 0.35)
+  FLAT_TEXT(12, 49, 216, "This is not refundable.", 0.24)
+  itemDef { rect 12 98 100 28 0 0 type ITEM_TYPE_BUTTON style WINDOW_STYLE_FILLED backcolor 0.1 0.23 0.12 0.9 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.35 0.5 0.36 0.8 text "Purchase" textfont UI_FONT_NORMAL textscale 0.26 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 20 forecolor MONEY_COLOR visible 1 action { CASH_BEGIN scriptMenuResponse "confirm_demolition"; close self; } }
+  itemDef { rect 128 98 100 28 0 0 type ITEM_TYPE_BUTTON style WINDOW_STYLE_FILLED backcolor 0 0 0 0.5 border WINDOW_BORDER_FULL bordersize 1 bordercolor 0.4 0.4 0.42 0.8 text "Cancel" textfont UI_FONT_NORMAL textscale 0.26 textalign ITEM_ALIGN_CENTER textalignx 0 textaligny 20 forecolor 0.9 0.92 0.94 1 visible 1 action { close self; } }
+ }
+}

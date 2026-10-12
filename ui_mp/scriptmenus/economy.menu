@@ -1,0 +1,11 @@
+#include "ui/menudef.h"
+
+{
+	menuDef
+	{
+		name "economy"
+		rect 0 0 0 0
+		style WINDOW_STYLE_EMPTY
+		onEsc { close self; }
+	}
+}

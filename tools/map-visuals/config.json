@@ -1,0 +1,36 @@
+{
+  "maps": ["mp_backlot", "mp_crash", "mp_vacant", "mp_citystreets", "mp_strike", "mp_crossfire"],
+  "contrast": 0.5,
+  "foliage": {
+    "pattern": "grass|bush|shrub|palm|foliage|leaf|leaves|ivy|hedge|fern|weed|vine|(^|_)tree",
+    "full_mask_pattern": "grass|shrub|weed|fern",
+    "hue": 95,
+    "hue_mix": 0.5,
+    "saturation": 1.6
+  },
+  "skip_techset": "unlit|tools|shadowcaster|sky|sun|effect|particle|multiply|distortion|^2d",
+  "skip_image": "^(weapon_|mtl_weapon|specialty|hud_|compass_|viewhands|\\$)|^(default|rgb|grey|white|black)$|flare|_cross$",
+  "keep_stock": "^(80s_|mtl_uaz|vehicle_|ch46e_|bus|pickup_|tanker_truck|bulldozer|mtl_truck|xpec_delivery|car_engine)",
+  "character_model": "^(body_|head_|viewhands_|viewmodel_|weapon_)",
+  "overrides": {
+    "me_cargocontainerexteriorwall_col": { "contrast": 0.7 },
+    "me_cargocontainerexteriordoor_col": { "contrast": 0.7 },
+    "me_cargocontainertop_col": { "contrast": 0.7 },
+    "me_cargocontainerexteriorwall_nml": { "normal": 0.55 },
+    "me_cargocontainerexteriordoor_nml": { "normal": 0.55 }
+  },
+  "visions": {
+    "mp_backlot": {
+      "r_filmContrast": "1.42",
+      "r_filmBrightness": "0.17",
+      "r_filmDesaturation": "0.15",
+      "r_filmLightTint": "1.03 0.98 0.9",
+      "r_filmDarkTint": "0.68 0.66 0.65"
+    },
+    "mp_crash": "auto",
+    "mp_vacant": "auto",
+    "mp_citystreets": "auto",
+    "mp_strike": "auto",
+    "mp_crossfire": "auto"
+  }
+}

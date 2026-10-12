@@ -1,0 +1,6 @@
+name,file,type,channel,loadspec,vol_min,vol_max,vol_mod,reverb
+ui_money_give,promod/ui/money_give.wav,loaded,local,all_mp,0.65,0.65,interface,nowetlevel fulldrylevel
+ui_money_receive,promod/ui/money_receive.wav,loaded,local,all_mp,0.65,0.65,interface,nowetlevel fulldrylevel
+ui_purchase,promod/ui/purchase.wav,loaded,local,all_mp,0.65,0.65,interface,nowetlevel fulldrylevel
+ui_denied,promod/ui/denied.wav,loaded,local,all_mp,0.65,0.65,interface,nowetlevel fulldrylevel
+ui_armor,promod/ui/armor.wav,loaded,local,all_mp,0.65,0.65,interface,nowetlevel fulldrylevel
