@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+## v0.1.0 - 2026-10-12
+
 ### 2026-10-12
 
-- Published the standalone mod source with standard and economy configurations.
+- Released the standalone mod source and installable package with standard and economy configurations.
 - Ordinary servers can run without an account or extension. The public match-stat interface is a no-op; optional stat tracking and managed admission require a separately installed server extension. A version contract detects incompatible overrides.
 - Added `promod_buy_seconds` to configure the economy buy phase from 10 to 60 seconds, with a default of 30. Changes apply at the next buy phase.
 - Increased the sniper armor penetration upgrade from $100 to $150 and Frag grenades from $50 to $100. Armor remains $50 per charge.
