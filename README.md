@@ -28,6 +28,10 @@ The output is `build/ui-learning/game-combined-v5/mods/pmflex/`. It contains `mo
 
 To install the public mod, copy the **contents** of that built `mods/pmflex` directory to the game's or server's `mods/pmflex` directory, replacing the corresponding files, then start with `fs_game mods/pmflex`. A client and a pure server need matching `mod.ff` and IWD bytes. Do not copy this repository's source folders directly into the game directory.
 
+For a tagged release, download `pmflex-v0.1.0-mod.zip` from the [GitHub Releases page](https://github.com/laspencer91/pmflex/releases). Extract it into the Call of Duty 4 installation directory; the archive's `mods/pmflex/` paths put the files in place. The ZIP includes the standard and economy configurations, the public match-stats contract, and license documents. It does not include the optional server extension. Server operators install any independent extension separately, outside `mods/pmflex`.
+
+To package a locally built mod for a release, run `python tools/package-release.py --version v0.1.0 --mod-dir build/ui-learning/game-combined-v5/mods/pmflex`. The packager includes an explicit list of public runtime files and checks the archive after writing it.
+
 ## Launch
 
 From the Call of Duty 4 installation directory, after installing the built mod, start a local/LAN dedicated server with either profile:

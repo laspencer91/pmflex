@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.1.0 - 2026-10-12
+
 ### 2026-10-12
 
 - Omitted the old checkout's local `.cmd` launch wrappers and screenshot capture workflow from the public source release; the README documents standalone game and server launch commands instead. The generated `build/` runtime remains excluded from Git and source distribution.
