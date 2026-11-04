@@ -129,12 +129,14 @@ overlapProtect(duration)
 {
 	self endon( "disconnect" );
 	self endon ( "strongerFlash" );
-	for(;duration > 0;)
+	startedAt = getTime();
+	durationMs = duration * 1000;
+	while (getTime() - startedAt < durationMs)
 	{
-		duration -= 0.05;
-		self.flashDuration = duration;
+		self.flashDuration = max(0, durationMs - (getTime() - startedAt)) / 1000.0;
 		wait 0.05;
 	}
+	self.flashDuration = 0;
 }
 
 isFlashbanged()

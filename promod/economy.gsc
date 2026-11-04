@@ -119,6 +119,7 @@ init()
 	level.economyLive = false;
 	if (getDvarInt("repeat_smoke")) level thread promod\repeat_buy_smoke::run();
 	if (getDvarInt("profile_smoke")) level thread promod\profile_smoke::run();
+	if (getDvarInt("tickrate_test")) level thread promod\tickrate_smoke::run();
 	if (getDvarInt("economy_manual_test"))
 		level thread promod\economy_manual_test::run();
 	if (getDvarInt("economy_smoke"))

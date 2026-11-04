@@ -141,66 +141,23 @@ monitorKeys()
 		if ( self.sessionstate != "playing" )
 			continue;
 
-		if ( self useButtonPressed() && !self meleeButtonPressed() )
-		{
-			useButtonTime = 0;
-			while ( self useButtonPressed() && !self meleeButtonPressed() )
-			{
-				useButtonTime += 0.05;
-				wait 0.05;
-			}
+		if ( self useOnly() && !self doubleTap( ::useOnly, ::loadPos ) )
+			continue;
 
-			if ( useButtonTime > 0.5 || !useButtonTime )
-				continue;
-
-			for ( i = 0; i < 0.5; i += 0.1 )
-			{
-				wait 0.1;
-
-				if ( self useButtonPressed() && !self meleeButtonPressed() )
-				{
-					loadPos();
-					break;
-				}
-			}
-		}
-
-		if ( self meleeButtonPressed() && !self useButtonPressed() )
-		{
-			meleeButtonTime = 0;
-			while ( self meleeButtonPressed() && !self useButtonPressed() )
-			{
-				meleeButtonTime += 0.05;
-				wait 0.05;
-			}
-
-			if ( meleeButtonTime > 0.5 || !meleeButtonTime )
-				continue;
-
-			for ( i = 0; i < 0.5; i += 0.1 )
-			{
-				wait 0.1;
-
-				if ( self meleeButtonPressed() && !self useButtonPressed() )
-				{
-					savePos();
-					break;
-				}
-			}
-		}
+		if ( self meleeOnly() && !self doubleTap( ::meleeOnly, ::savePos ) )
+			continue;
 
 		if ( self meleeButtonPressed() || self useButtonPressed() )
 		{
 			wait 0.1;
 
-			bothButtonTime = 0;
-			while ( bothButtonTime < 0.5 && self meleeButtonPressed() && self useButtonPressed() )
+			buttonStart = getTime();
+			while ( getTime() - buttonStart < 500 && self meleeButtonPressed() && self useButtonPressed() )
 			{
-				bothButtonTime += 0.05;
 				wait 0.05;
 			}
 
-			if ( bothButtonTime > 0.35 )
+			if ( getTime() - buttonStart > 350 )
 			{
 				if ( !isDefined( self.nofly ) )
 				{
@@ -222,6 +179,40 @@ monitorKeys()
 				wait 0.05;
 		}
 	}
+}
+
+useOnly()
+{
+	return self useButtonPressed() && !self meleeButtonPressed();
+}
+
+meleeOnly()
+{
+	return self meleeButtonPressed() && !self useButtonPressed();
+}
+
+// Runs action on a second tap within 500ms; returns false when the first press was a hold.
+doubleTap( pressed, action )
+{
+	buttonStart = getTime();
+	while ( self [[pressed]]() )
+		wait 0.05;
+
+	if ( getTime() - buttonStart > 500 )
+		return false;
+
+	startedAt = getTime();
+	while ( getTime() - startedAt < 500 )
+	{
+		wait 0.1;
+
+		if ( self [[pressed]]() )
+		{
+			self [[action]]();
+			break;
+		}
+	}
+	return true;
 }
 
 loadPos()
@@ -324,28 +315,12 @@ nadeFlying( player, weaponName )
 	if ( stop_flying || return_flying )
 		wait 0.1;
 	else
-	{
-		for ( i = 0; i < time - 0.5; i += 0.1 )
-		{
-			wait 0.1;
-
-			if ( player useButtonPressed() )
-				break;
-		}
-	}
+		waitUseOrTimeout( player, time - 0.5 );
 
 	player.flyobject unlink();
 
 	if ( stop_flying )
-	{
-		for ( i = 0; i < time + 0.4; i += 0.1 )
-		{
-			wait 0.1;
-
-			if ( player useButtonPressed() )
-				break;
-		}
-	}
+		waitUseOrTimeout( player, time + 0.4 );
 
 	player.flyobject moveto( old_player_origin, 0.1 );
 
@@ -356,6 +331,18 @@ nadeFlying( player, weaponName )
 
 	if ( isDefined( player.flyobject ) )
 		player.flyobject delete();
+}
+
+waitUseOrTimeout( player, seconds )
+{
+	startedAt = getTime();
+	while ( getTime() - startedAt < seconds * 1000 )
+	{
+		wait 0.1;
+
+		if ( player useButtonPressed() )
+			break;
+	}
 }
 
 createHUD()

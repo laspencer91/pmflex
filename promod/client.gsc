@@ -50,12 +50,19 @@ setsunlight(n)
 
 use_config()
 {
+	network = promod\tickrate::settings();
+	// High-rate engines pace packets; smoke-depth servers manage r_zfeather.
+	if (!network.highRate)
+		self setClientDvar("cl_maxpackets", 100);
+	if (!network.smokeDepth)
+		self setClientDvar("r_zfeather", 0);
 	self setsunlight(self get_config("PROMOD_SUNLIGHT"));
+	// Keep each batch within the script VM's operand-stack limit.
 	self setClientDvars(
 	"aim_automelee_enabled", 0,
 	"aim_automelee_range", 0,
 	"dynent_active", 0,
-	"snaps", 30,
+	"snaps", network.snaps,
 	"cg_nopredict", 0,
 	"cg_crosshairenemycolor", 0,
 	"sm_enable", 0,
@@ -71,17 +78,16 @@ use_config()
 	"cg_huddamageiconwidth", 128,
 	"cg_huddamageiconinscope", 0,
 	"cg_huddamageiconoffset", 128,
-	"cg_huddamageicontime", 2000,
+	"cg_huddamageicontime", 2000);
+	self setClientDvars(
 	"ragdoll_enable", 0,
 	"r_filmtweakinvert", 0,
 	"r_desaturation", 0,
 	"r_dlightlimit", 0,
 	"r_fog", 0,
 	"r_specularcolorscale", 0,
-	"r_zfeather", 0,
 	"fx_drawclouds", 0,
-	"rate", 25000,
-	"cl_maxpackets", 100,
+	"rate", network.rate,
 	"developer", 0,
 	"phys_gravity", -800,
 	"r_normalmap", self get_config("PROMOD_NORMALMAP"),

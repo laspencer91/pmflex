@@ -197,7 +197,7 @@ spectatorKillcamCleanup( attacker )
 
 	attacker waittill ( "begin_killcam", attackerKcStartTime );
 	waitTime = max( 0, (attackerKcStartTime - self.deathTime) - 50 );
-	wait waitTime;
+	wait waitTime / 1000.0;
 	self endKillcam();
 }
 

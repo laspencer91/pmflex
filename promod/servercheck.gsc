@@ -21,9 +21,11 @@ main()
 
 		forceDvar( "authServerName", "cod4master.activision.com" );
 		forceDvar( "sv_disableClientConsole", "0" );
-		forceDvar( "sv_fps", "20" );
+		network = promod\tickrate::settings();
+		forceDvar( "sv_fps", "" + network.fps );
 		forceDvar( "sv_pure", "1" );
-		forceDvar( "sv_maxrate", "25000" );
+		if (!network.patched)
+			forceDvar( "sv_maxrate", "" + network.rate );
 		forceDvar( "g_gravity", "800" );
 		forceDvar( "g_speed", "190" );
 		forceDvar( "g_knockback", "1000" );

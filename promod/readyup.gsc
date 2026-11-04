@@ -226,11 +226,10 @@ lastPlayerReady()
 
 	while ( !level.ready_up_over )
 	{
-		maxwait = 0;
-		while ( !level.ready_up_over && level.not_ready_count == 1 && level.players.size > 1 && maxwait <= 5 )
+		startedAt = getTime();
+		while ( !level.ready_up_over && level.not_ready_count == 1 && level.players.size > 1 && getTime() - startedAt < 5000 )
 		{
 			wait 0.05;
-			maxwait += 0.05;
 		}
 
 		if( level.not_ready_count == 1 && level.players.size > 1 )

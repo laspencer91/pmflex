@@ -77,6 +77,7 @@ stratTime()
 
 	level.strat_over = false;
 	strat_time_left = game["PROMOD_STRATTIME"] + level.prematchPeriod * int( getDvarInt( "promod_allow_strattime" ) && isDefined( game["CUSTOM_MODE"] ) && game["CUSTOM_MODE"] && level.gametype == "sd" );
+	startedAt = getTime();
 
 	while ( !level.strat_over )
 	{
@@ -91,9 +92,7 @@ stratTime()
 
 		wait 0.25;
 
-		strat_time_left -= 0.25;
-
-		if ( strat_time_left <= 0 || game["promod_timeout_called"] )
+		if ( getTime() - startedAt >= strat_time_left * 1000 || game["promod_timeout_called"] )
 			level.strat_over = true;
 	}
 

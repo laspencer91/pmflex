@@ -2135,11 +2135,10 @@ resumeTimer()
 
 openMainMenu()
 {
-	maxwait = 0;
-	while ( !level.players.size && maxwait <= 1 )
+	startedAt = getTime();
+	while ( !level.players.size && getTime() - startedAt < 1000 )
 	{
 		wait 0.05;
-		maxwait += 0.05;
 	}
 
 	for ( i = 0; i < level.players.size; i++ )
@@ -3609,25 +3608,23 @@ cancelKillCamOnUse()
 			continue;
 		}
 
-		buttonTime = 0;
+		buttonStart = getTime();
 		while( self UseButtonPressed() )
 		{
-			buttonTime += 0.05 ;
 			wait 0.05;
 		}
 
-		if ( buttonTime >= 0.5 )
+		if ( getTime() - buttonStart >= 500 )
 			continue;
 
-		buttonTime = 0;
+		buttonStart = getTime();
 
-		while ( !self UseButtonPressed() && buttonTime < 0.5 )
+		while ( !self UseButtonPressed() && getTime() - buttonStart < 500 )
 		{
-			buttonTime += 0.05 ;
 			wait 0.05;
 		}
 
-		if ( buttonTime >= 0.5 )
+		if ( getTime() - buttonStart >= 500 )
 			continue;
 
 		self.cancelKillcam = true;

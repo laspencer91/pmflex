@@ -672,24 +672,13 @@ useObjectProxThink()
 	level endon ( "game_ended" );
 
 	self thread proxTriggerThink();
+	previousTime = getTime();
 
 	for(;;)
 	{
-		if ( self.useTime && self.curProgress >= self.useTime )
-		{
-			self.curProgress = 0;
-
-			creditPlayer = getEarliestClaimPlayer();
-
-			if ( isDefined( self.onEndUse ) )
-				self [[self.onEndUse]]( self getClaimTeam(), creditPlayer, isDefined( creditPlayer ) );
-
-			if ( isDefined( creditPlayer ) && isDefined( self.onUse ) )
-				self [[self.onUse]]( creditPlayer );
-
-			self setClaimTeam( "none" );
-			self.claimPlayer = undefined;
-		}
+		now = getTime();
+		elapsed = min(now - previousTime, now - self.lastClaimTime);
+		previousTime = now;
 
 		if ( self.claimTeam != "none" )
 		{
@@ -705,9 +694,10 @@ useObjectProxThink()
 				}
 				else
 				{
-					self.curProgress += (50 * self.useRate);
+					step = elapsed * self.useRate;
+					self.curProgress += step;
 					if ( isDefined( self.onUseUpdate ) )
-						self [[self.onUseUpdate]]( self getClaimTeam(), self.curProgress / self.useTime, (50*self.useRate) / self.useTime );
+						self [[self.onUseUpdate]]( self getClaimTeam(), self.curProgress / self.useTime, step / self.useTime );
 				}
 			}
 			else
@@ -718,6 +708,18 @@ useObjectProxThink()
 				self setClaimTeam( "none" );
 				self.claimPlayer = undefined;
 			}
+		}
+
+		if ( self.useTime && self.curProgress >= self.useTime )
+		{
+			self.curProgress = 0;
+			creditPlayer = getEarliestClaimPlayer();
+			if ( isDefined( self.onEndUse ) )
+				self [[self.onEndUse]]( self getClaimTeam(), creditPlayer, isDefined( creditPlayer ) );
+			if ( isDefined( creditPlayer ) && isDefined( self.onUse ) )
+				self [[self.onUse]]( creditPlayer );
+			self setClaimTeam( "none" );
+			self.claimPlayer = undefined;
 		}
 
 		wait 0.05;
@@ -917,15 +919,13 @@ useHoldThinkLoop( player )
 	self endon("disabled");
 
 	waitForWeapon = true;
-	timedOut = 0;
+	previousTime = getTime();
 
-	maxWaitTime = 1.5;
-
-	while( isDefined( player ) && isAlive( player ) && player isTouching( self.trigger ) && player useButtonPressed() && !player.throwingGrenade && !player meleeButtonPressed() && self.curProgress < self.useTime && (self.useRate || waitForWeapon) && !(waitForWeapon && timedOut > maxWaitTime) )
+	while( isDefined( player ) && isAlive( player ) && player isTouching( self.trigger ) && player useButtonPressed() && !player.throwingGrenade && !player meleeButtonPressed() && self.curProgress < self.useTime && (self.useRate || waitForWeapon) )
 	{
-		timedOut += 0.05;
-
-		self.curProgress += (50 * self.useRate);
+		now = getTime();
+		self.curProgress += (now - previousTime) * self.useRate;
+		previousTime = now;
 		self.useRate = 1;
 		waitForWeapon = false;
 

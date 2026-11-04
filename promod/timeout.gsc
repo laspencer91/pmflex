@@ -66,10 +66,12 @@ timeoutLoop()
 
 timeoutLeft()
 {
+	startedAt = getTime();
+	durationMs = level.timeout_time_left * 1000;
 	while( !level.timeout_over )
 	{
 		wait 0.25;
-		level.timeout_time_left -= 0.25;
+		level.timeout_time_left = max(0, durationMs - (getTime() - startedAt)) / 1000.0;
 	}
 }
 

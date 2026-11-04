@@ -129,6 +129,8 @@ rawfile,promod/economy_armor_smoke.gsc
 rawfile,promod/economy_smoke.gsc
 rawfile,promod/economy_items_smoke.gsc
 rawfile,promod/client.gsc
+rawfile,promod/tickrate.gsc
+rawfile,promod/tickrate_smoke.gsc
 rawfile,promod/comp.gsc
 rawfile,promod/dvarmon.gsc
 rawfile,promod/messagecenter.gsc
