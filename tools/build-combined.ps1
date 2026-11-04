@@ -26,8 +26,7 @@ $files = @('promod\repeat_buy.gsc', 'promod\repeat_buy_smoke.gsc', 'tools\standa
     'maps\mp\gametypes\_class.gsc', 'maps\mp\gametypes\_globallogic.gsc', 'promod\economy.gsc',
     'promod\economy_items.gsc', 'promod\economy_armor.gsc', 'promod\flat_loadout.gsc',
     'ui_mp\scriptmenus\flat_loadout.menu', 'ui_mp\flat_loadout_widgets.inc', 'tools\combined.cfg',
-    'promod\economy_penetration.gsc', 'tools\generate-ui-materials.py',
-    'assets\ui-icons\penetration-ammo.tga', 'assets\ui-icons\wall-impact.tga')
+    'promod\economy_income_smoke.gsc', 'tools\generate-ui-materials.py')
 $hashes = foreach ($file in $files) {
     [ordered]@{ path = $file; sha256 = (Get-FileHash -LiteralPath (Join-Path $repoRoot $file)).Hash }
 }

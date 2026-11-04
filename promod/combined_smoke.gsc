@@ -128,11 +128,10 @@ inactivePurchaseChecks(player)
 		frag = player promod\economy::buyFrag();
 		redDot = player promod\economy::buyRedDot();
 		armor = player promod\economy::buyArmor();
-		penetration = player promod\economy::buySniperPenetration();
 		suppressor = player promod\economy_items::buySuppressor("primary");
 		demo = player promod\economy::buyDemolition();
 		check(frag["status"] == "inactive" && redDot["status"] == "inactive" && armor["status"] == "inactive" &&
-			penetration["status"] == "inactive" && suppressor["status"] == "inactive" && demo["status"] == "inactive" &&
+			suppressor["status"] == "inactive" && demo["status"] == "inactive" &&
 			player promod\economy::cash() == cash && !player promod\economy::canPurchase(), states[i] + "_purchases_denied_without_spending");
 	}
 	player.sessionstate = session;
@@ -175,11 +174,10 @@ closedRoundChecks( player )
 		"live_class_change_queued_without_respawn");
 	tester promod\flat_loadout::respond("attachment:silencer");
 	tester promod\flat_loadout::respond("preview_frag");
+	charges = tester promod\economy_armor::charges();
 	tester promod\flat_loadout::respond("buy_armor");
-	tester promod\flat_loadout::respond("buy_sniper_penetration");
 	check(tester promod\economy::cash() == cash && !tester promod\economy_items::ownsSuppressor("primary") &&
-		!tester promod\economy_items::ownsFrag() && tester promod\economy_armor::charges() == 0 &&
-		!tester promod\economy_penetration::owns(), "live_menu_purchase_paths_denied");
+		!tester promod\economy_items::ownsFrag() && tester promod\economy_armor::charges() == charges, "live_menu_purchase_paths_denied");
 	tester promod\flat_loadout::respond("select:assault");
 	tester promod\flat_loadout::respond("closed");
 }
@@ -190,9 +188,9 @@ refundChecks( player )
 	cash = player promod\economy::cash();
 	player promod\flat_loadout::respond("buy_armor");
 	player promod\flat_loadout::respond("buy_armor");
+	check(player promod\economy_armor::charges() == 2 && player promod\economy::cash() == cash - 100, "armor_menu_purchase_fills_vest");
 	player promod\flat_loadout::respond("refund_armor");
-	check(player promod\economy_armor::charges() == 1 && player promod\economy::cash() == cash - 50, "armor_refund_one_charge");
-	player promod\flat_loadout::respond("refund_armor");
+	check(player promod\economy_armor::charges() == 0 && player promod\economy::cash() == cash, "armor_menu_refund_whole_purchase");
 	player promod\flat_loadout::respond("refund_armor");
 	check(player promod\economy_armor::charges() == 0 && player promod\economy::cash() == cash, "armor_refund_stops_at_zero");
 	entry = player promod\economy::account();
@@ -207,14 +205,4 @@ refundChecks( player )
 	player promod\flat_loadout::respond("refund_frag");
 	level.economyBuyOpen = true;
 	check(player promod\economy_items::ownsFrag() && player promod\economy::cash() == cash, "refund_denied_after_buy_closes");
-	class = player.pers["class"];
-	player.pers["class"] = "sniper";
-	player.pers["sniper"]["loadout_primary"] = "m40a3";
-	player promod\flat_loadout::respond("buy_sniper_penetration");
-	player promod\flat_loadout::respond("refund_sniper_penetration");
-	check(!player promod\economy_penetration::owns() && player promod\economy::cash() == cash, "sniper_upgrade_refund");
-	player promod\flat_loadout::respond("buy_sniper_penetration");
-	player.pers["class"] = class;
-	player promod\economy_items::refundUnused();
-	check(!player promod\economy_penetration::owns() && player promod\economy::cash() == cash, "class_change_refunds_sniper_upgrade");
 }

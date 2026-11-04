@@ -65,15 +65,16 @@ run()
 		player promod\economy_items::buyRedDot();
 		player promod\economy::creditCash(promod\economy::price("frag"), "repeat_fixture");
 		player promod\economy_items::buyFrag();
-		player promod\economy::creditCash(50, "repeat_fixture");
+		player promod\economy::creditCash(promod\economy::price("armor"), "repeat_fixture");
 		player promod\economy_armor::buy();
 		pref = player promod\repeat_buy::preferences();
-		check(pref["attachment"] == "reflex" && pref["frag"] && pref["armor"] == 1, "successful_manual_buys_remembered");
+		check(pref["attachment"] == "reflex" && pref["frag"] && pref["armor"] == 2, "successful_manual_buys_remembered");
 		player notify("menuresponse", "flat_loadout", "repeat_buy");
 		wait 0.1;
 		pref = player promod\repeat_buy::preferences();
 		check(pref["enabled"] && player promod\economy::cash() == 0, "menu_toggle_saves_next_round_without_spending");
 		player promod\economy_items::onGrenadeFire("frag_grenade_mp");
+		promod\economy_armor_smoke::setCharges(player, 0);
 		if (game["repeat_test_failed"]) return;
 		player promod\economy::creditCash(promod\economy::price("frag"), "repeat_fixture");
 		game["repeat_test_stage"] = 1;
@@ -92,7 +93,7 @@ run()
 		wait 0.05;
 	}
 	pref = player promod\repeat_buy::preferences();
-	check(pref["enabled"] && pref["attachment"] == "reflex" && pref["frag"] && pref["armor"] == 1, "preferences_survive_round_restart_and_partial_budget");
+	check(pref["enabled"] && pref["attachment"] == "reflex" && pref["frag"] && pref["armor"] == 2, "preferences_survive_round_restart_and_partial_budget");
 	check(player promod\economy::cash() == 0 && player promod\economy_items::ownsRedDot("m4") &&
 		player promod\economy_items::ownsFrag() && player promod\economy_armor::charges() == 0, "automatic_next_round_attachment_then_frag_before_armor");
 	player maps\mp\gametypes\_class::giveLoadout("allies", "assault");
@@ -101,32 +102,28 @@ run()
 	player promod\economy::creditCash(75, "repeat_fixture");
 	player promod\repeat_buy::attempt();
 	check(player promod\economy::cash() == 75 && player promod\economy_armor::charges() == 0, "no_retry_after_later_cash_transfer");
-	fixture(player, "m4", "reflex", true, 1, 150, true);
+	fixture(player, "m4", "reflex", true, 1, 100 + promod\economy::price("armor"), true);
 	player promod\repeat_buy::attempt();
 	check(player promod\economy::cash() == 0 && player promod\economy_items::ownsRedDot("m4") &&
-		player promod\economy_armor::charges() == 1 && player promod\economy_items::ownsFrag(), "carried_frag_not_charged_again");
-	fixture(player, "uzi", "reflex", true, 1, 50 + promod\economy::price("frag"), false);
+		player promod\economy_armor::charges() == 2 && player promod\economy_items::ownsFrag(), "carried_frag_not_charged_again");
+	fixture(player, "uzi", "reflex", true, 1, promod\economy::price("armor") + promod\economy::price("frag"), false);
 	player promod\repeat_buy::attempt();
 	check(player promod\economy::cash() == 0 && !player promod\economy_items::ownsRedDot("uzi") &&
-		player promod\economy_items::ownsFrag() && player promod\economy_armor::charges() == 1, "incompatible_attachment_skipped_without_debit");
+		player promod\economy_items::ownsFrag() && player promod\economy_armor::charges() == 2, "incompatible_attachment_skipped_without_debit");
 	fixture(player, "m4", "silencer", true, 1, 50 + promod\economy::price("frag"), false);
 	player promod\repeat_buy::attempt();
 	check(player promod\economy::cash() == 0 && player promod\economy_items::ownsSuppressor("primary") &&
 		!player promod\economy_items::ownsRedDot("m4") && player.pers["assault"]["loadout_primary_attachment"] == "silencer" &&
 		player promod\economy_items::ownsFrag(), "suppressor_is_one_attachment_purchase");
-	fixture(player, "m40a3", "sniper_penetration", true, 1, promod\economy::price("sniper_penetration"), false);
-	player promod\repeat_buy::attempt();
-	frag = player promod\economy_items::buyFrag();
-	check(player promod\economy::cash() == 0 && player promod\economy_penetration::owns() &&
-		!player promod\economy_items::ownsFrag() && player promod\economy_armor::charges() == 0 && frag["status"] == "funds", "sniper_upgrade_uses_its_price_and_frag_reports_funds");
 	fixture(player, "m4", "reflex", true, 2, 40, false);
 	player promod\repeat_buy::attempt();
 	pref = player promod\repeat_buy::preferences();
 	check(player promod\economy::cash() == 40 && !player promod\economy_items::ownsFrag() && pref["armor"] == 2, "unfunded_items_skip_without_erasing_preferences");
-	fixture(player, "m4", "none", false, 2, 50, false);
+	fixture(player, "m4", "none", false, 2, promod\economy::price("armor") / 2, false);
+	promod\economy_armor_smoke::setCharges(player, 1);
 	player promod\repeat_buy::attempt();
 	pref = player promod\repeat_buy::preferences();
-	check(player promod\economy_armor::charges() == 1 && player promod\economy::cash() == 0 && pref["armor"] == 2, "partial_armor_keeps_requested_count");
+	check(player promod\economy_armor::charges() == 2 && player promod\economy::cash() == 0 && pref["armor"] == 2, "carried_vest_refilled_for_half_price");
 	fixture(player, "m4", "reflex", true, 1, 100, false);
 	level.economyBuyOpen = false;
 	player promod\repeat_buy::attempt();

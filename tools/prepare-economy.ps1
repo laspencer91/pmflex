@@ -10,7 +10,7 @@ if (-not $runtimeRoot.StartsWith($workspaceBuild + '\', [StringComparison]::Ordi
 }
 $buildRoot = Split-Path -Parent $runtimeRoot
 $executable = Join-Path $runtimeRoot 'iw3mp.exe'
-$running = @(Get-Process iw3mp -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $executable })
+$running = @(Get-Process iw3mp -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited -and $_.Path -eq $executable })
 if ($running.Count) {
     throw "Close the economy game before continuing. Running process ID: $($running.Id -join ', ')."
 }

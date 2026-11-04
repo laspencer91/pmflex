@@ -1,6 +1,6 @@
 build/
+
+# Local runtime markers and Python caches.
+/__iw3mp
 __pycache__/
 *.py[cod]
-/__iw3mp
-docs/evidence/*
-!docs/evidence/.gitkeep

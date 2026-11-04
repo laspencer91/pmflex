@@ -84,9 +84,6 @@ def main():
         glow_name = name.replace('corner', 'glow')
         write_glow_frame(textures / (glow_name + '.tga'), *spec)
         names.append(glow_name)
-    for name, filename in {'ui_penetration_ammo': 'penetration-ammo', 'ui_wall_impact': 'wall-impact'}.items():
-        shutil.copyfile(repo / 'assets/ui-icons' / (filename + '.tga'), textures / (name + '.tga'))
-        names.append(name)
     for name in names:
         entries.append(f'''    "{name}" ( "material.gdf" )
     {{

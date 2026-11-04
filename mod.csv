@@ -123,9 +123,8 @@ rawfile,promod/economy_manual_test.gsc
 rawfile,promod/economy_items.gsc
 rawfile,promod/economy_combat.gsc
 rawfile,promod/economy_armor.gsc
-rawfile,promod/economy_penetration.gsc
-rawfile,promod/economy_penetration_smoke.gsc
 rawfile,promod/economy_armor_smoke.gsc
+rawfile,promod/economy_income_smoke.gsc
 rawfile,promod/economy_smoke.gsc
 rawfile,promod/economy_items_smoke.gsc
 rawfile,promod/client.gsc
@@ -160,8 +159,6 @@ stringtable,promod/destructible.csv
 xmodel,com_floodlight_on
 material,hud_suitcase_bomb
 material,specialty_armorvest
-material,ui_penetration_ammo
-material,ui_wall_impact
 material,hud_icon_ak47
 material,hud_icon_mp5
 material,hud_icon_m40a3

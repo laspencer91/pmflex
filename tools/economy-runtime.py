@@ -51,6 +51,11 @@ def main():
                '+set', 'fs_game', 'mods/' + args.mod, '+set', 'sv_punkbuster', '0',
                '+set', 'promod_mode', 'custom_public_lan', '+set', 'g_gametype', 'sd', '+set', 'promod_economy', '1', '+set', 'repeat_smoke', '0', '+set', 'profile_smoke', '0', '+set', 'economy_smoke', '1',
                '+set', 'logfile', '2', '+set', 'g_log', 'games_mp.log', '+set', 'g_logSync', '1', '+map', 'mp_crash']
+    # The fixtures' cash arithmetic assumes the earlier income: no start money, $100 a round, $50 a kill, no
+    # round-result money and no cap. promod/economy_income_smoke.gsc checks the current defaults separately.
+    legacy_income = [('promod_econ_start', '0'), ('promod_econ_round_pay', '100'), ('promod_econ_kill', '50'),
+                     ('promod_econ_win', '0'), ('promod_econ_loss', '0'), ('promod_econ_loss_step', '0'), ('promod_econ_cap', '0')]
+    command[1:1] = [part for setting, value in legacy_income for part in ('+set', setting, value)]
     if args.offline:
         command[1:1] = ['+set', 'net_noudp', '1', '+set', 'net_noipx', '1', '+set', 'cl_punkbuster', '0']
     if args.combined:

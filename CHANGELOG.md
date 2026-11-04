@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## v0.1.14 - 2026-11-04
+
+- Economy income follows the H1 ProMod model: $50 at the start of each half and $50 every round, $25 kills and assists, $50 team plant or defuse, $100 for a round won and $25 loss money growing by $25 per loss in a row up to $100, and a $500 cash cap. Every amount and price is a server setting (`promod_econ_*`, `promod_price_*`).
+- Armor costs $100 for two charges; each halves one body hit from a bullet, through a wall or not. Headshots, explosives and melee pass through, and the pellets of one shotgun blast share a charge. Armor lasts until death; one spent charge refills for $50. The sniper armor-penetration upgrade is removed.
+- Full-auto rifles and SMGs kick half as hard on the first two aimed shots of each burst (`adsGunKickReducedKickBullets 2`, `adsGunKickReducedKickPercent 50`).
+- Promod's timers, clocks and HUD checks follow the engine tick rate on 100 Hz CoD4x servers (`promod/tickrate.gsc`); 20 Hz servers keep the old defaults.
+- Soft smoke edges (`r_zfeather`) are allowed when the server publishes the `sv_volumetricSmoke v1` policy and the CoD4x client reports `cl_volumetricSmokeDepth`.
+
+
 ## v0.1.0 - 2026-10-12
 
 ### 2026-10-12

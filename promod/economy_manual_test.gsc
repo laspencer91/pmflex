@@ -119,8 +119,7 @@ respond( command )
 		thread maps\mp\gametypes\_globallogic::endGame("tie", game["strings"]["round_draw"]);
 	else if (command == "status")
 		self iPrintLn("Target health: " + max(0, target.health) + ". Armor: " + target promod\economy_armor::charges() +
-			". Your cash: " + promod\economy::cashText(self promod\economy::cash()) +
-			". Sniper penetration: " + int(self promod\economy_penetration::owns()));
+			". Your cash: " + promod\economy::cashText(self promod\economy::cash()));
 }
 
 reportDamage( attacker, damage, flags, hitloc )
@@ -160,9 +159,6 @@ smoke()
 			wait 0.1;
 		check(level.economyManualTarget promod\economy_armor::charges() == 2, "new_round_target_rebuys_armor");
 		check(distance(level.economyManualTarget.origin, game["economy_manual_origin"]) < 32, "position_survives_round_restart");
-		for (i = 0; i < level.players.size; i++)
-			if (isDefined(level.players[i].pers["economy_manual_player"]))
-				check(!level.players[i] promod\economy_penetration::owns(), "new_round_upgrade_expired");
 		if (!level.economyManualFailed)
 			logPrint("LOCAL_ECONOMY_TEST;PASSED\n");
 		return;
@@ -192,9 +188,9 @@ smoke()
 		wait 0.1;
 	check(level.economyManualTarget promod\economy_armor::charges() == 2 &&
 		level.economyManualTarget promod\economy::cash() == 0, "target_buys_two_with_round_income");
-	player notify("menuresponse", "economy", "buy_sniper_penetration");
+	player notify("menuresponse", "economy", "buy_armor");
 	wait 0.1;
-	check(player promod\economy_penetration::owns() && player promod\economy::cash() == 0, "client_purchase_route");
+	check(player promod\economy_armor::charges() == 2 && player promod\economy::cash() == 0, "client_purchase_route");
 	deadline = getTime() + 10000;
 	while (player.sessionstate != "playing" && getTime() < deadline)
 		wait 0.1;

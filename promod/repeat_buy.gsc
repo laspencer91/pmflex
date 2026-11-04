@@ -33,7 +33,6 @@ toggle()
 			pref["attachment"] = "none";
 		if (pref["attachment"] == "silencer" && !self promod\economy_items::ownsSuppressor("primary"))
 			pref["attachment"] = "none";
-		if (self promod\economy_penetration::owns()) pref["attachment"] = "sniper_penetration";
 		pref["frag"] = self promod\economy_items::ownsFrag();
 		pref["armor"] = self promod\economy_armor::charges();
 		entry = self promod\economy::account();
@@ -99,25 +98,10 @@ attempt()
 		if (attachment == "silencer") label = "Suppressor";
 		summary = note(summary, label, result);
 	}
-	else if (attachment == "sniper_penetration")
-		summary = note(summary, "Sniper upgrade", self promod\economy_penetration::buy());
 	if (pref["frag"]) summary = note(summary, "Frag", self promod\economy_items::buyFrag());
-	target = int(min(pref["armor"], level.economyArmorCapacity));
-	for (i = 0; i < target; i++)
-	{
-		if (self promod\economy_armor::charges() >= target) break;
-		result = self promod\economy_armor::buy();
-		if (!result["success"])
-		{
-			summary = note(summary, "Armor", result);
-			break;
-		}
-	}
-	if (target > 0 && self promod\economy_armor::charges() > 0)
-	{
-		if (summary != "") summary += " / ";
-		summary += "Armor " + self promod\economy_armor::charges() + "/" + target;
-	}
+	// One purchase fills the vest, or refills a carried vest with one charge left.
+	if (pref["armor"] > 0)
+		summary = note(summary, "Armor", self promod\economy_armor::buy());
 	self.economyAutoBuying = false;
 	if (summary == "") summary = "No paid items saved";
 	summary = "Auto-rebuy: " + summary;

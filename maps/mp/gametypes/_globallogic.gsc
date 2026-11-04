@@ -773,6 +773,8 @@ endGame( winner, endReasonText, statsReason )
 	if ( isDefined( game["PROMOD_MATCH_MODE"] ) && game["PROMOD_MATCH_MODE"] == "match" )
 		setDvar( "g_deadChat", 1 );
 
+	promod\economy::awardRoundResult( winner );
+
 	game["state"] = "postgame";
 	level.gameEndTime = getTime();
 	level.gameEnded = true;

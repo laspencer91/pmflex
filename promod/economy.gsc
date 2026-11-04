@@ -5,33 +5,49 @@ setupRules()
 {
 	level.economyBuySeconds = configuredBuySeconds();
 	level.economyArmorCapacity = 2;
-	level.economyArmorDamageScale = 0.25;
+	// Server settings, read at every map load (each S&D round), so an rcon change applies from the next round.
+	level.economyArmorAbsorb = setting("promod_armor_absorb", 50, 0, 100);
+	level.economyStartCash = setting("promod_econ_start", 50, 0, 10000);
+	level.economyLossStep = setting("promod_econ_loss_step", 25, 0, 10000);
+	level.economyLossMax = setting("promod_econ_loss_max", 100, 0, 10000);
+	level.economyCap = setting("promod_econ_cap", 500, 0, 100000);
+	level.economyGift = 50;
 	level.economyPrices = [];
-	level.economyPrices["demolition"] = 300;
-	level.economyPrices["frag"] = 100;
-	level.economyPrices["red_dot"] = 100;
-	level.economyPrices["armor"] = 50;
-	level.economyPrices["sniper_penetration"] = 150;
-	level.economyPrices["suppressor"] = 50;
+	level.economyPrices["demolition"] = setting("promod_price_demolition", 300, 1, 10000);
+	level.economyPrices["frag"] = setting("promod_price_frag", 100, 1, 10000);
+	level.economyPrices["red_dot"] = setting("promod_price_reddot", 100, 1, 10000);
+	level.economyPrices["armor"] = setting("promod_price_armor", 100, 2, 10000);
+	level.economyPrices["suppressor"] = setting("promod_price_suppressor", 50, 1, 10000);
 	level.economyItemLabels = [];
 	level.economyItemLabels["demolition"] = "Demolition";
 	level.economyItemLabels["frag"] = "Frag";
 	level.economyItemLabels["red_dot"] = "Red dot";
-	level.economyItemLabels["armor"] = "Armor charge";
-	level.economyItemLabels["sniper_penetration"] = "Sniper armor penetration";
+	level.economyItemLabels["armor"] = "Armor";
 	level.economyItemLabels["suppressor"] = "Suppressor";
 	level.economyRewards = [];
-	level.economyRewards["round"] = 100;
-	level.economyRewards["plant"] = 50;
-	level.economyRewards["defuse"] = 50;
-	level.economyRewards["kill"] = 50;
-	level.economyRewards["assist"] = 25;
+	level.economyRewards["round"] = setting("promod_econ_round_pay", 50, 0, 10000);
+	level.economyRewards["plant"] = setting("promod_econ_objective", 50, 0, 10000);
+	level.economyRewards["defuse"] = level.economyRewards["plant"];
+	level.economyRewards["kill"] = setting("promod_econ_kill", 25, 0, 10000);
+	level.economyRewards["assist"] = setting("promod_econ_assist", 25, 0, 10000);
+	level.economyRewards["win"] = setting("promod_econ_win", 100, 0, 10000);
+	level.economyRewards["loss"] = setting("promod_econ_loss", 25, 0, 10000);
 	level.economyRewardLabels = [];
 	level.economyRewardLabels["round"] = "Round income";
 	level.economyRewardLabels["plant"] = "Team plant";
 	level.economyRewardLabels["defuse"] = "Team defuse";
 	level.economyRewardLabels["kill"] = "Kill";
 	level.economyRewardLabels["assist"] = "Assist";
+	level.economyRewardLabels["win"] = "Round won";
+	level.economyRewardLabels["loss"] = "Loss bonus";
+}
+
+// An unset server setting keeps its default; a set one is clamped to its range.
+setting( name, fallback, low, high )
+{
+	if (getDvar(name) == "")
+		return fallback;
+	return int(min(high, max(low, getDvarInt(name))));
 }
 
 price( item )
@@ -94,6 +110,14 @@ resetMatch()
 	game["economy"]["halfResetRound"] = -1;
 	game["economy"]["objectiveRounds"] = [];
 	game["economy"]["enabledProfile"] = enabled();
+	resetLossStreaks();
+}
+
+resetLossStreaks()
+{
+	game["economy"]["lossStreak"] = [];
+	game["economy"]["lossStreak"]["allies"] = 0;
+	game["economy"]["lossStreak"]["axis"] = 0;
 }
 
 init()
@@ -147,7 +171,7 @@ account()
 	if (!isDefined(game["economy"]["accounts"][id]))
 	{
 		entry = [];
-		entry["cash"] = 0;
+		entry["cash"] = level.economyStartCash;
 		entry["repeatBuyRound"] = -1;
 		entry["creditedRound"] = -1;
 		entry["demolitionTeam"] = "";
@@ -156,7 +180,9 @@ account()
 		entry["redDot"] = false;
 		entry["suppressors"] = promod\economy_items::noSuppressors();
 		entry["armor"] = 0;
-		entry["sniperPenetration"] = false;
+		entry["armorPaid"] = 0;
+		entry["armorPaidRound"] = -1;
+		entry["armorBefore"] = 0;
 		entry["itemsRound"] = -1;
 		entry["itemsTeam"] = "";
 		game["economy"]["accounts"][id] = entry;
@@ -175,15 +201,20 @@ cash()
 	return entry["cash"];
 }
 
-creditCash( amount, reason )
+// Returns the amount credited. Income stops at the cash cap; refunds (uncapped) return in full.
+creditCash( amount, reason, uncapped )
 {
 	if (!enabled() || !self hasTeam() || !isDefined(amount) || amount <= 0 || amount != int(amount))
-		return false;
+		return 0;
 	entry = self account();
+	if (level.economyCap > 0 && !(isDefined(uncapped) && uncapped))
+		amount = int(min(amount, level.economyCap - entry["cash"]));
+	if (amount <= 0)
+		return 0;
 	entry["cash"] += amount;
 	self saveAccount(entry);
 	logPrint("ECONOMY;credit;" + reason + ";" + self.pers["economy_id"] + ";" + amount + ";" + entry["cash"] + "\n");
-	return true;
+	return amount;
 }
 
 trySpendCash( amount, reason )
@@ -213,11 +244,19 @@ giveCash( recipient )
 	self account();
 	recipient account();
 	if (self.pers["economy_id"] == recipient.pers["economy_id"]) return false;
-	if (!self trySpendCash(50, "donation")) return false;
-	recipient creditCash(50, "donation");
+	if (!self canGive(recipient)) return false;
+	if (!self trySpendCash(level.economyGift, "donation")) return false;
+	recipient creditCash(level.economyGift, "donation");
 	self publish();
 	recipient publish();
 	return true;
+}
+
+// Funds and the recipient's cap; giveCash() also checks the buy phase and the team.
+canGive( recipient )
+{
+	return self cash() >= level.economyGift &&
+		(level.economyCap <= 0 || recipient cash() + level.economyGift <= level.economyCap);
 }
 
 cashText( amount )
@@ -227,11 +266,72 @@ cashText( amount )
 
 awardReward( event )
 {
-	if (!realRound() || !level.economyLive || !self creditCash(reward(event), event))
+	if (!realRound() || !level.economyLive || !self creditMessage(reward(event), event))
 		return false;
-	self iPrintLn(level.economyRewardLabels[event] + ": +" + cashText(reward(event)));
 	self publish();
 	return true;
+}
+
+creditMessage( amount, event )
+{
+	credited = self creditCash(amount, event);
+	if (credited)
+		self iPrintLn(level.economyRewardLabels[event] + ": +" + cashText(credited));
+	return credited;
+}
+
+// Loss money grows with each loss in a row: loss, loss + step, ... up to the maximum.
+lossPay( streak )
+{
+	pay = reward("loss") + level.economyLossStep * (int(max(1, streak)) - 1);
+	if (level.economyLossMax > 0)
+		pay = int(min(pay, max(reward("loss"), level.economyLossMax)));
+	return pay;
+}
+
+// Win money for the winners and growing loss money for the losers. A tie pays both teams loss money
+// without extending a streak. endGame() calls this before it marks the round as ended.
+awardRoundResult( winner )
+{
+	if (!realRound() || !level.economyLive || !isDefined(winner))
+		return;
+	if (isDefined(game["economy"]["objectiveRounds"]["result"]) && game["economy"]["objectiveRounds"]["result"] == game["roundsplayed"])
+		return;
+	game["economy"]["objectiveRounds"]["result"] = game["roundsplayed"];
+	if (!isDefined(game["economy"]["lossStreak"]))
+		resetLossStreaks();
+	teams = strTok("allies,axis", ",");
+	pay = [];
+	for (t = 0; t < teams.size; t++)
+	{
+		team = teams[t];
+		if (winner == team)
+		{
+			game["economy"]["lossStreak"][team] = 0;
+			pay[team] = reward("win");
+		}
+		else
+		{
+			if (winner == "allies" || winner == "axis")
+				game["economy"]["lossStreak"][team]++;
+			pay[team] = lossPay(game["economy"]["lossStreak"][team]);
+		}
+	}
+	for (p = 0; p < level.players.size; p++)
+	{
+		player = level.players[p];
+		if (!player hasTeam())
+			continue;
+		team = player.pers["team"];
+		event = "loss";
+		if (winner == team)
+			event = "win";
+		// The next buy phase publishes the full state; only the HUD cash changes now.
+		if (player creditMessage(pay[team], event))
+			player updateCashHud(player cash());
+	}
+	logPrint("ECONOMY;round_result;" + winner + ";" + pay["allies"] + ";" + pay["axis"] + ";" +
+		game["economy"]["lossStreak"]["allies"] + ";" + game["economy"]["lossStreak"]["axis"] + "\n");
 }
 
 hasTeam()
@@ -282,6 +382,7 @@ publish()
 	if (pref["enabled"]) repeatLabel = "AUTO-REBUY: ON";
 	entry = self account();
 	self updateCashHud(entry["cash"]);
+	armor = self promod\economy_armor::charges();
 	canBuy = buying() && self hasTeam();
 	available = false;
 	if (enabled() && self hasTeam())
@@ -289,14 +390,10 @@ publish()
 	self setClientDvars("economy_repeat_enabled", int(pref["enabled"]), "economy_repeat_label", repeatLabel,
 		"economy_cash", entry["cash"], "economy_buy_open", int(canBuy), "economy_purchase_allowed", int(self canPurchase()),
 		"economy_demolition_owned", int(self ownsDemolition()), "economy_demolition_available", int(available),
-		"economy_demolition_price", price("demolition"), "economy_armor_price", price("armor"),
-		"economy_armor_charges", self promod\economy_armor::charges(), "economy_armor_capacity", level.economyArmorCapacity,
-		"economy_can_buy_armor", int(self promod\economy_armor::canBuy()));
-	self setClientDvars("economy_sniper_penetration_price", price("sniper_penetration"),
-		"economy_sniper_penetration_owned", int(self promod\economy_penetration::owns()),
-		"economy_sniper_penetration_supported", int(self promod\economy_penetration::eligible()),
-		"economy_can_buy_sniper_penetration", int(self promod\economy_penetration::canBuy()),
-		"economy_frag_price", price("frag"), "economy_frag_owned", int(self promod\economy_items::ownsFrag()),
+		"economy_demolition_price", price("demolition"), "economy_armor_price", promod\economy_armor::cost(armor),
+		"economy_armor_charges", armor, "economy_armor_capacity", level.economyArmorCapacity,
+		"economy_can_buy_armor", int(self promod\economy_armor::canBuy(armor)));
+	self setClientDvars("economy_frag_price", price("frag"), "economy_frag_owned", int(self promod\economy_items::ownsFrag()),
 		"economy_can_buy_frag", int(self promod\economy_items::canBuyFrag()), "economy_frag_refundable", int(self promod\economy_items::fragRefundable()));
 	weapon = self promod\economy_items::selectedWeapon();
 	redDot = int(self promod\economy_items::canUseRedDot(weapon));
@@ -497,9 +594,7 @@ loadoutChanged()
 // Read at the start of every buy phase, so an rcon change applies from the next round.
 configuredBuySeconds()
 {
-	if (getDvar("promod_buy_seconds") == "")
-		return 30;
-	return int(min(60, max(10, getDvarInt("promod_buy_seconds"))));
+	return setting("promod_buy_seconds", 30, 10, 60);
 }
 
 buyPhase()
@@ -620,11 +715,6 @@ buyDemolition()
 	return self purchaseResult("purchased", "demolition");
 }
 
-buySniperPenetration()
-{
-	return self promod\economy_penetration::buy();
-}
-
 buyArmor()
 {
 	return self promod\economy_armor::buy();
@@ -704,8 +794,6 @@ respond( response )
 			self freezeForBuy();
 		}
 	}
-	else if (response == "buy_sniper_penetration")
-		self showPurchase(self buySniperPenetration());
 	else if (response == "buy_armor")
 		self showPurchase(self buyArmor());
 	else if (response == "buy_frag")
@@ -772,17 +860,18 @@ resetHalf()
 	if (!enabled() || game["PROMOD_KNIFEROUND"] || game["economy"]["halfResetRound"] == game["roundsplayed"])
 		return;
 	game["economy"]["halfResetRound"] = game["roundsplayed"];
+	resetLossStreaks();
 	ids = getArrayKeys(game["economy"]["accounts"]);
 	for (i = 0; i < ids.size; i++)
 	{
 		entry = game["economy"]["accounts"][ids[i]];
-		entry["cash"] = 0;
+		entry["cash"] = level.economyStartCash;
 		entry["creditedRound"] = -1;
 		entry["demolitionTeam"] = "";
 		entry["frag"] = false;
 		entry["redDot"] = false;
 		entry["armor"] = 0;
-		entry["sniperPenetration"] = false;
+		entry["armorPaid"] = 0;
 		entry["itemsRound"] = -1;
 		entry["itemsTeam"] = "";
 		game["economy"]["accounts"][ids[i]] = entry;

@@ -9,8 +9,6 @@ prepareRound()
 		return;
 	entry["itemsRound"] = game["roundsplayed"];
 	entry["redDot"] = false;
-	entry["armor"] = 0;
-	entry["sniperPenetration"] = false;
 	entry["suppressors"] = noSuppressors();
 	self promod\economy::saveAccount(entry);
 	classes = strTok("assault,specops,demolitions,sniper", ",");
@@ -36,7 +34,7 @@ clear()
 	entry["frag"] = false;
 	entry["redDot"] = false;
 	entry["armor"] = 0;
-	entry["sniperPenetration"] = false;
+	entry["armorPaid"] = 0;
 	entry["suppressors"] = noSuppressors();
 	entry["itemsTeam"] = "";
 	self promod\economy::saveAccount(entry);
@@ -268,9 +266,11 @@ fragRefundable()
 	return entry["fragRound"] == game["roundsplayed"];
 }
 
-refundItem( item )
+refundItem( item, amount )
 {
-	self promod\economy::creditCash(promod\economy::price(item), "refund_" + item);
+	if (!isDefined(amount))
+		amount = promod\economy::price(item);
+	self promod\economy::creditCash(amount, "refund_" + item, true);
 	return self promod\economy::purchaseResult("refunded", item);
 }
 
@@ -280,7 +280,6 @@ refund( item )
 	blocker = self promod\economy::purchaseBlocker();
 	if (blocker != "") return self promod\economy::purchaseResult(blocker, item);
 	if (item == "armor") return self promod\economy_armor::refund();
-	if (item == "sniper_penetration") return self promod\economy_penetration::refund();
 	if (item != "frag") return self promod\economy::purchaseResult("unavailable", item);
 	if (!self fragRefundable()) return self promod\economy::purchaseResult("not_refundable", "frag");
 	self clearFrag();
@@ -336,11 +335,6 @@ refundUnused()
 	{
 		entry["redDot"] = false;
 		refunds[refunds.size] = "red_dot";
-	}
-	if (entry["sniperPenetration"] && !self promod\economy_penetration::eligible())
-	{
-		entry["sniperPenetration"] = false;
-		refunds[refunds.size] = "sniper_penetration";
 	}
 	if (!refunds.size) return "";
 	self promod\economy::saveAccount(entry);

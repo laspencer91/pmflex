@@ -128,7 +128,7 @@ publishTeamTo( player, teamName )
 		fragSelected = isDefined(mate.flatPreviewFrag) && mate.flatPreviewFrag;
 		if (promod\economy::enabled()) fragSelected = mate promod\economy_items::ownsFrag();
 		canGive = mate != player && player.flatPreviewCash >= 50;
-		if (promod\economy::enabled()) canGive = mate != player && promod\economy::buying() && player promod\economy::cash() >= 50;
+		if (promod\economy::enabled()) canGive = mate != player && promod\economy::buying() && player promod\economy::canGive(mate);
 		className = "CHOOSING";
 		if (isDefined(mate.pers["class"]))
 			className = maps\mp\gametypes\_quickmessages::chooseClassName(mate.pers["class"]);
@@ -430,7 +430,7 @@ respond( response )
 		self purchaseFeedback(result);
 		return;
 	}
-	if (response == "refund_frag" || response == "refund_armor" || response == "refund_sniper_penetration")
+	if (response == "refund_frag" || response == "refund_armor")
 	{
 		if (!promod\economy::enabled())
 		{
@@ -447,13 +447,6 @@ respond( response )
 		slot = "primary"; attachment = getSubStr(response, 7); none = "attachment:none";
 		if (response == "refund_pistol_silencer") { slot = "secondary"; attachment = "silencer"; none = "pistol_attachment:none"; }
 		if (self.pers[self.pers["class"]]["loadout_" + slot + "_attachment"] == attachment) self respond(none);
-		return;
-	}
-	if (response == "buy_sniper_penetration")
-	{
-		if (!promod\economy::enabled()) return;
-		result = self promod\economy::buySniperPenetration();
-		self purchaseFeedback(result);
 		return;
 	}
 	if (response == "deploy")

@@ -148,7 +148,7 @@ def visions(args, cfg):
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('step', choices=['textures', 'visions'])
-    ap.add_argument('--game', default=r'D:\Games\Steam\steamapps\common\Call of Duty 4')
+    ap.add_argument('--game', default=r'C:\Program Files (x86)\Steam\steamapps\common\Call of Duty 4')
     ap.add_argument('--tools', default=os.path.join(REPO, '..', 'cod4-mod-tools'))
     args = ap.parse_args()
     cfg = json.load(open(os.path.join(HERE, 'config.json')))

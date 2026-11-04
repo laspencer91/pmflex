@@ -64,7 +64,7 @@ run()
 	while (!isDefined(player.economyMenuRound) && getTime() < deadline) wait 0.05;
 	check(player promod\economy::isTestClient() && !(isDefined(player.flatMenuOpen) && player.flatMenuOpen), "test_client_buy_menu_not_held_" + stage);
 	promod\economy_armor_smoke::buyChecks(player, stage);
-	promod\economy_penetration_smoke::buyChecks(player, stage);
+	if (stage == 0) promod\economy_income_smoke::run(player);
 	if (getDvarInt("combined_smoke") && stage == 0) promod\combined_smoke::run(player);
 	check(isDefined(player.economyMenuRound) && player.economyMenuRound == game["roundsplayed"], "buy_selector_opened_" + stage);
 	logPrint("ECONOMY_TEST;STATE;" + stage + ";" + game["roundsplayed"] + ";" + game["economy"]["accounts"][entry]["cash"] + ";" + game["economy"]["accounts"][entry]["creditedRound"] + "\n");
@@ -131,7 +131,6 @@ run()
 			logPrint("COMBINED_TEST;ammo_after;" + player getWeaponAmmoClip(weapon) + ";" + player getWeaponAmmoStock(weapon) + "\n");
 		promod\economy_items_smoke::liveChecks(player, stage);
 		promod\economy_armor_smoke::liveChecks(player, stage);
-		promod\economy_penetration_smoke::liveChecks(player, stage);
 		if (stage == 0)
 			check(!player promod\economy::awardReward("unknown") && player promod\economy::cash() == 100, "unknown_reward_rejected");
 		if (stage == 1)
@@ -178,7 +177,6 @@ run()
 		waitLive();
 		promod\economy_items_smoke::liveChecks(player, stage);
 		promod\economy_armor_smoke::liveChecks(player, stage);
-		promod\economy_penetration_smoke::liveChecks(player, stage);
 		check(player.curClass == "demolitions" && !player promod\economy::loadoutChanged(), "purchased_loadout_applied");
 		competitor promod\economy::buyDemolition();
 		check(game["economy"]["accounts"][other]["cash"] == 300, "live_buy_denied");
@@ -191,7 +189,6 @@ run()
 	waitLive();
 	promod\economy_items_smoke::liveChecks(player, stage);
 	promod\economy_armor_smoke::liveChecks(player, stage);
-	promod\economy_penetration_smoke::liveChecks(player, stage);
 	for (i = 0; i < level.players.size; i++)
 		level.players[i] freezeControls(true);
 	player suicide();
@@ -225,7 +222,6 @@ run()
 	setDvar("class_demolitions_limit", 1);
 	promod\economy_items_smoke::seedHalfItems();
 	promod\economy_armor_smoke::seedHalf();
-	promod\economy_penetration_smoke::seedHalf();
 	level.economyBuyOpen = false;
 	beforePlant = cashSnapshot();
 	level.sdBomb.safeOrigin = level.sdBomb.visuals[0].origin;
@@ -240,7 +236,6 @@ run()
 	check(game["economy"]["accounts"][entry]["cash"] == 0 && game["economy"]["accounts"][entry]["demolitionTeam"] == "" && player.pers["class"] != "demolitions", "halftime_resets_cash_and_owner");
 	promod\economy_items_smoke::checkHalfItems();
 	promod\economy_armor_smoke::checkHalf();
-	promod\economy_penetration_smoke::checkHalf();
 	level.economyBuyOpen = true;
 	level.economyBuyEnd = getTime() + 10000;
 	player promod\economy::creditRound();
