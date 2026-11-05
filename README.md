@@ -30,6 +30,11 @@ To install the public mod, copy the **contents** of that built `mods/pmflex` dir
 
 Players and server operators should use the packaged releases at [cod4-promod-releases](https://github.com/laspencer91/cod4-promod-releases/releases): `PromodFlex-Client.zip` installs the mod with its CoD4x client (100 Hz and volumetric smoke), and `PromodFlex-Server.zip` holds the matching 100 Hz CoD4x server and profiles. The volumetric smoke renderer and its map-grid baker are closed source and are not part of this repository; the mod plays with stock smoke without them. This repository is exported from the private development repository; changes are made there.
 
+In 0.1.15, the server chooses smoke with `sets smoke_type "0"` (stock) or `sets smoke_type "1"` (volumetric, the startup default).
+Execute `smoke-stock.cfg` or `smoke-volumetric.cfg` after the profile and before loading/restarting the map.
+The matching client defaults new profiles to quarter-resolution smoke; saved full/half/quarter choices remain.
+The packaged grids cover Backlot, Citystreets, Crash, Crossfire, Strike and Vacant. Other maps retain stock smoke.
+
 To package a locally built mod for a release, run `python tools/package-release.py --version v0.1.0 --mod-dir build/ui-learning/game-combined-v5/mods/pmflex`. The packager includes an explicit list of public runtime files and checks the archive after writing it.
 
 ## Launch

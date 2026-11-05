@@ -43,12 +43,26 @@ run()
 checkPolicyRefresh(patched)
 {
 	policy = getDvar("sv_volumetricSmoke");
+	smokeType = getDvar("smoke_type");
+	setDvar("smoke_type", ""); // exercise legacy policy compatibility independently
 	setDvar("sv_volumetricSmoke", "v1");
 	network = promod\tickrate::settings();
 	check(network.smokeDepth, "smoke_policy_enabled");
 	setDvar("sv_volumetricSmoke", "");
 	network = promod\tickrate::settings();
 	check(!network.smokeDepth, "smoke_policy_disabled");
+	setDvar("sv_volumetricSmoke", "v1");
+	setDvar("smoke_type", "0");
+	network = promod\tickrate::settings();
+	check(!network.smokeDepth, "stock_smoke_overrides_policy");
+	setDvar("smoke_type", "1");
+	setDvar("sv_volumetricSmoke", "");
+	network = promod\tickrate::settings();
+	check(network.smokeDepth, "volume_smoke_defaults_without_tuning");
+	setDvar("smoke_type", "2");
+	network = promod\tickrate::settings();
+	check(!network.smokeDepth, "invalid_smoke_type_keeps_stock");
+	setDvar("smoke_type", smokeType);
 	setDvar("sv_volumetricSmoke", policy);
 	if (!patched) return;
 

@@ -21,6 +21,9 @@ if ($UseStockAudio) {
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'combined.cfg') -Destination (Join-Path $runtime 'mods\pmflex\combined.cfg') -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'standard.cfg') -Destination (Join-Path $runtime 'mods\pmflex\standard.cfg') -Force
+foreach ($config in 'smoke-stock.cfg','smoke-volumetric.cfg') {
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot $config) -Destination (Join-Path $runtime ('mods\pmflex\' + $config)) -Force
+}
 & (Join-Path $PSScriptRoot 'prepare-local-session.ps1') -RuntimePath $runtime
 $files = @('promod\repeat_buy.gsc', 'promod\repeat_buy_smoke.gsc', 'tools\standard.cfg', 'ui_mp\cac_ingame.inc', 'promod\profile_smoke.gsc', 'mod.csv', 'maps\mp\gametypes\_menus.gsc', 'maps\mp\gametypes\_promod.gsc',
     'maps\mp\gametypes\_class.gsc', 'maps\mp\gametypes\_globallogic.gsc', 'promod\economy.gsc',

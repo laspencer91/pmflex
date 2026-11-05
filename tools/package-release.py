@@ -15,6 +15,8 @@ MOD_FILES = (
     "ui_style.iwd",
     "standard.cfg",
     "combined.cfg",
+    "smoke-stock.cfg",
+    "smoke-volumetric.cfg",
     "match-stats-contract.json",
 )
 DOC_FILES = (
@@ -53,7 +55,10 @@ def main():
     contract = json.loads((mod_dir / "match-stats-contract.json").read_text(encoding="utf-8-sig"))
     if contract.get("modFfSha256") != digest((mod_dir / "mod.ff").read_bytes()):
         parser.error("built mod.ff does not match the contract sidecar")
-    if contract.get("publicStubSha256") != digest((ROOT / "promod/match_stats.gsc").read_bytes()):
+    stub = (ROOT / "promod/match_stats.gsc").read_bytes()
+    stub_lf = stub.replace(b"\r\n", b"\n")
+    stub_hashes = {digest(stub), digest(stub_lf), digest(stub_lf.replace(b"\n", b"\r\n"))}
+    if contract.get("publicStubSha256") not in stub_hashes:
         parser.error("the built mod uses a different public recorder stub")
     for iwd in ("pmflex.iwd", "z_c_r.iwd", "ui_style.iwd"):
         with ZipFile(mod_dir / iwd) as archive:

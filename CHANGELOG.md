@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.1.15 - 2026-11-04
+
+- Added server-controlled smoke selection: `smoke_type 0` uses stock smoke and `smoke_type 1` uses volumetric smoke. Sample standard and economy configurations default to 1; helper configs select either mode before loading/restarting the map.
+- Matching updated clients enforce the server's smoke choice and default new profiles to quarter resolution while preserving saved quality choices. Volumetric smoke requires the separately supplied client, renderer and map grid.
+- Updated the matched client/renderer package with configuration-memory, MSAA/distortion, asynchronous particle preparation, opaque-smoke and stable-bloom fixes. The 100 Hz server engine is unchanged.
+
 ## v0.1.14 - 2026-11-04
 
 - Economy income follows the H1 ProMod model: $50 at the start of each half and $50 every round, $25 kills and assists, $50 team plant or defuse, $100 for a round won and $25 loss money growing by $25 per loss in a row up to $100, and a $500 cash cap. Every amount and price is a server setting (`promod_econ_*`, `promod_price_*`).

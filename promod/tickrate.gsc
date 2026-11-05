@@ -12,6 +12,11 @@ settings()
 	// Soft smoke edges (r_zfeather) stay forced off unless the engine reports the v1 smoke policy.
 	policy = strTok(getDvar("sv_volumetricSmoke"), " ");
 	result.smokeDepth = policy.size > 0 && policy[0] == "v1";
+	// 2026-11-04: the server's explicit smoke selector takes precedence over
+	// legacy policy-only activation. Clients verify the raw replicated value.
+	smokeType = getDvar("smoke_type");
+	if (smokeType != "")
+		result.smokeDepth = smokeType == "1";
 	frameMs = getDvarInt("sv_tickrate_active_ms");
 	if (getDvarInt("sv_tickrate_protocol") != 1 || (frameMs != 10 && frameMs != 50))
 		return result;
